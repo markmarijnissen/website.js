@@ -3,7 +3,7 @@ website.js
 
 A static-site generator that runs in your browser
 
-## The Idea
+### The Idea
 
 **website.js** handles 
 
@@ -31,13 +31,13 @@ So if you have
 
 Then you'll have a static site up and running in no time!
 
-## Installation
+### Installation
 ```
 npm install websitejs
 bower install websitejs
 ```
 
-## Example
+### Example
 
 Run a static file server, then navigate to `/example`.
 ```
@@ -47,14 +47,12 @@ static .
 
 ## Usage
 
-You need to have
+1. Create a Website
+2. Write your Site Metadata (e.g. `site.json`)
+3. Use an API (to fetch site metadata and content)
+4. Use a Renderer (to render the page)
 
-* Create a Website
-* Write your Site Metadata (e.g. `site.json`)
-* Use an API (to fetch site metadata and content)
-* Use a Renderer (to render the page)
-
-## Create a Website 
+### 1. Create a Website 
 ```javascript
 var site = new Website({
 	html5: true      // default true, if browser supports it
@@ -74,7 +72,7 @@ site.on(event,function(...){
 })
 ```
 
-### Events
+#### Events
 
 Enhance your website (content, rendering) by listening to events.
 
@@ -116,7 +114,7 @@ site.setContent('home','Hello world');
 site.setDataForUrl('/page1',{title:'Page 1', content:'page1'});
 ```
 
-### Site Metadata
+### 2. Site Metadata
 
 [Example](https://github.com/markmarijnissen/website.js/blob/master/example/site.json) site metadata:
 
@@ -144,7 +142,7 @@ var data = {
 * `pageMetadata` must have `content`
 * `content` points to a `contentId` in a String or Object.
 
-### The API
+### 3. The API
 
 When instantiating the Website, the Site Metadata will be fetched using the API.
 
@@ -168,7 +166,7 @@ When browsing the site, content is fetched as defined in `pageMetadata`.
 }
 ```
 
-### The Renderer
+### 4. The Renderer
 Upon navigating, the Renderer renders your page
 ```javascript
 {
