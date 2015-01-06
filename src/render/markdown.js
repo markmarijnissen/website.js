@@ -4,7 +4,9 @@ var getElement = require('../utils/getCachedElementById');
 
 var MarkdownRenderer = {
 	gotContent: function(id,content){
-		this.content[id] = marked(content);
+		if(!this.options.markdown || !this.options.markdown.test || this.options.markdown.test(id)){
+			this.content[id] = marked(content);
+		}
 	},
 	render: HTMLRenderer.render
 };

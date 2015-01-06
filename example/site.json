@@ -3,20 +3,25 @@
         "/": {
             "title": "Home",
             "content": {
-                "content": "page1"
+                "layout":"defaultLayout.html",
+                "content": "home.md"
             }
         },
         "/page2": {
-            "title": "Page2",
-            "content": "page2"
+            "title": "A",
+            "content": {
+                "sidebar": "sidebara.md",
+                "content": "pagea.md",
+                "layout":"defaultLayout.html"
+            }
         },
         "/page3": {
-            "title": "Page3",
-            "content": "page3"
+            "title": "B",
+            "content": "pageb.md"
         },
         "/*": {
             "title": "not found!",
-            "content": "notfound"
+            "content": "notfound.html"
         }
     }
 }
