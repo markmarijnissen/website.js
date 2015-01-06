@@ -1,0 +1,1 @@
+Homepage. Goto <a href="/example/page2">page2</a>

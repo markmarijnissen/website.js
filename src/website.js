@@ -1,3 +1,4 @@
+window.setImmediate = setTimeout;
 require('js-object-clone');
 require('polyfill-function-prototype-bind');
 var Promise = require('Promise');
@@ -91,6 +92,15 @@ Website.prototype.refresh = function(){
 	this.router.set();
 };
 
+function contentHasId(obj,val){
+	if(obj === val) return true;
+	if(typeof obj !== 'object') return false;
+	for(var key in obj){
+		if(obj[key] === val) return true;
+	}
+	return false;
+}
+
 /**
  * Live update site content (e.g. when using Firebase)
  *
@@ -104,8 +114,7 @@ Website.prototype.setContent = function(id,content){
 
 	// refresh page if needed
 	var data = this.sitemap[this.router.currentRoute];
-	if(data && data.content &&
-		(data.content === id || data.content[id]))
+	if(data && data.content && contentHasId(data.content,id))
 	{
 		this.refresh();
 	}

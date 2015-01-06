@@ -7,8 +7,10 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <script src="https://cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
         <script src="../dist/website.js"></script>
         <script src="../dist/website.api.http.js"></script>
+        <script src="../dist/website.api.firebase.js"></script>
         <script src="../dist/website.render.markdown.js"></script>
         <script>
             window.site = new Website({
@@ -18,6 +20,7 @@
                 contentUrl: location.origin + '/example/content/',
                 markdown: /\.md$/,
                 dataUrl: location.origin + '/example/site.json',
+
                 api: Website.api.http,
                 render: Website.render.markdown
             });
