@@ -46,18 +46,25 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var marked = __webpack_require__(8);
-
 	var getElement = __webpack_require__(3);
 
 	function Render(data) {
+		var self = this;
 		if(data.title)	document.title = data.title;
 		if(typeof data.content === 'string'){
-			document.body.innerHTML = data.content;
+			document.body.innerHTML = marked(data.content);
 		} else if(typeof data.content === 'object'){
 			Object.keys(data.content)
-				.map(function(id){
+				.forEach(function(id){
 					var el = getElement(id);
-					if(el) el.innerHTML = data.content[id];
+					if(el) {
+						// cache markdown
+						if(!self.htmlContent) self.htmlContent = {};
+						if(!self.htmlContent[id]) {
+							self.htmlContent[id] = marked(data.content[id]);
+						}
+						el.innerHTML = self.htmlContent[id];
+					}
 				});
 		}
 	}

@@ -44,9 +44,9 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Router = __webpack_require__(6);
+	var Router = __webpack_require__(5);
 	__webpack_require__(4);
-	__webpack_require__(5);
+	__webpack_require__(6);
 
 	var defaultApi = __webpack_require__(1);
 	var defaultRender = __webpack_require__(2);
@@ -459,38 +459,7 @@
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-	if (!Function.prototype.bind) {
-	  Function.prototype.bind = function (oThis) {
-	    if (typeof this !== "function") {
-	      // closest thing possible to the ECMAScript 5
-	      // internal IsCallable function
-	      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-	    }
-
-	    var aArgs = Array.prototype.slice.call(arguments, 1), 
-	        fToBind = this, 
-	        fNOP = function () {},
-	        fBound = function () {
-	          return fToBind.apply(this instanceof fNOP && oThis
-	                 ? this
-	                 : oThis,
-	                 aArgs.concat(Array.prototype.slice.call(arguments)));
-	        };
-
-	    fNOP.prototype = this.prototype;
-	    fBound.prototype = new fNOP();
-
-	    return fBound;
-	  };
-	}
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(5);
+	__webpack_require__(6);
 	var bodyDelegate = __webpack_require__(9)();
 	document.addEventListener('DOMContentLoaded',function(){
 	  bodyDelegate.root(document.body);
@@ -614,6 +583,37 @@
 	};
 
 	module.exports = Router;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+	if (!Function.prototype.bind) {
+	  Function.prototype.bind = function (oThis) {
+	    if (typeof this !== "function") {
+	      // closest thing possible to the ECMAScript 5
+	      // internal IsCallable function
+	      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+	    }
+
+	    var aArgs = Array.prototype.slice.call(arguments, 1), 
+	        fToBind = this, 
+	        fNOP = function () {},
+	        fBound = function () {
+	          return fToBind.apply(this instanceof fNOP && oThis
+	                 ? this
+	                 : oThis,
+	                 aArgs.concat(Array.prototype.slice.call(arguments)));
+	        };
+
+	    fNOP.prototype = this.prototype;
+	    fBound.prototype = new fNOP();
+
+	    return fBound;
+	  };
+	}
+
 
 /***/ },
 /* 7 */,
