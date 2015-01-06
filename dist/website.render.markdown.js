@@ -40,42 +40,51 @@
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 0:
+/******/ ([
+/* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var marked = __webpack_require__(8);
+	var HTMLRenderer = __webpack_require__(2);
 	var getElement = __webpack_require__(3);
 
-	function Render(data) {
-		var self = this;
-		if(data.title)	document.title = data.title;
-		if(typeof data.content === 'string'){
-			document.body.innerHTML = marked(data.content);
-		} else if(typeof data.content === 'object'){
-			Object.keys(data.content)
-				.forEach(function(id){
-					var el = getElement(id);
-					if(el) {
-						// cache markdown
-						if(!self.htmlContent) self.htmlContent = {};
-						if(!self.htmlContent[id]) {
-							self.htmlContent[id] = marked(data.content[id]);
-						}
-						el.innerHTML = self.htmlContent[id];
-					}
-				});
-		}
-	}
+	var MarkdownRenderer = {
+		gotContent: function(id,content){
+			this.content[id] = marked(content);
+		},
+		render: HTMLRenderer.render
+	};
 
-	// Auto install itself on ContentSite
-	Website.prototype.render = Render;
-	module.exports = Render;
+	if(window.Website) window.Website.render.markdown = MarkdownRenderer;
+	module.exports = MarkdownRenderer;
 
 /***/ },
+/* 1 */,
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
 
-/***/ 3:
+	var getElement = __webpack_require__(3);
+
+	var HTMLRenderer = {
+		render: function render(data) {
+			if(data.title)	document.title = data.title;
+			if(typeof data.content === 'string'){
+				document.body.innerHTML = data.content;
+			} else if(typeof data.content === 'object'){
+				Object.keys(data.content)
+					.map(function(id){
+						var el = getElement(id);
+						if(el) el.innerHTML = data.content[id];
+					});
+			}
+		}
+	};
+
+	if(window.Website) window.Website.render.html = HTMLRenderer;
+	module.exports = HTMLRenderer;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var elCache = {};
@@ -85,8 +94,11 @@
 	};
 
 /***/ },
-
-/***/ 8:
+/* 4 */,
+/* 5 */,
+/* 6 */,
+/* 7 */,
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -1359,5 +1371,4 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }
-
-/******/ })
+/******/ ])

@@ -10,13 +10,32 @@ function getFirebaseData(url){
 }
 
 var API = {
-	start: function(){
-		if(typeof Firebase === 'undefined'){
-			throw new Error("Need to include Firebase");
+	created: function(options){
+		var self = this;
+		if(options.dataUrl[options.dataUrl.length-1] !== '/') {
+			options.dataUrl += '/';
 		}
-		// initialize firebase refs
+
+		dataRef = new Firebase(this.options.dataUrl);
+		dataRef.on('value',function(snap){
+			self.data = snap.val();
+		});
+
+		sitemapRef = new Firebase(this.options.dataUrl + 'sitemap');
+		sitemapRef.on('child_changed',function(snap){
+			self.setDataForUrl(snap.key(),snap.val());
+		});
+
+		if(options.contentUrl[options.contentUrl.length-1] !== '/') {
+			options.contentUrl += '/';
+		}
+
+		contentRef = new Firebase(this.options.contentUrl);
+		contentRef.on('child_changed',function(snap){
+			self.setContent(snap.key(),snap.val());
+		});
 	},
-	getContent: function(url){
+	getContent: function(id){
 		return getFirebaseData(this.options.contentUrl + url);
 	},
 	getData: function(){
@@ -24,7 +43,5 @@ var API = {
 	}
 };
 
-
-// Auto install itself on ContentSite
-Website.prototype.api = API;
+if(window.Website) window.Website.api.firebase = API;
 module.exports = API;

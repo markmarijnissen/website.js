@@ -1,4 +1,4 @@
-// a   url (naming it a, beacause it will be reused to store callbacks)
+// a   url 
 function pegasus(url,json) {
   var xhr = new XMLHttpRequest();
 
@@ -36,11 +36,7 @@ function pegasus(url,json) {
         } else {
           data = xhr.responseText;
         }
-        if(typeof data !== undefined){
-          cb(data,xhr);
-        } else {
-          cb(null,xhr);
-        }
+        cb(data,xhr);
       }
     }
   };
@@ -53,7 +49,7 @@ function pegasus(url,json) {
 }
 
 var API = {
-  init: function(){
+  created: function(options){
     this.options.contentExt = this.options.contentExt || '';
     var baseUrl = this.options.contentUrl;
     if(baseUrl[baseUrl.length-1] !== '/') baseUrl += '/';
@@ -72,6 +68,5 @@ var API = {
 	}
 };
 
-// Auto install itself on ContentSite
-Website.prototype.api = API;
+if(window.Website) window.Website.api.http = API;
 module.exports = API;

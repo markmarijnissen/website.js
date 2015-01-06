@@ -1,27 +1,13 @@
 var marked = require('marked');
-var getElement = require('./getElement');
+var HTMLRenderer = require('./html');
+var getElement = require('../utils/getCachedElementById');
 
-function Render(data) {
-	var self = this;
-	if(data.title)	document.title = data.title;
-	if(typeof data.content === 'string'){
-		document.body.innerHTML = marked(data.content);
-	} else if(typeof data.content === 'object'){
-		Object.keys(data.content)
-			.forEach(function(id){
-				var el = getElement(id);
-				if(el) {
-					// cache markdown
-					if(!self.htmlContent) self.htmlContent = {};
-					if(!self.htmlContent[id]) {
-						self.htmlContent[id] = marked(data.content[id]);
-					}
-					el.innerHTML = self.htmlContent[id];
-				}
-			});
-	}
-}
+var MarkdownRenderer = {
+	gotContent: function(id,content){
+		this.content[id] = marked(content);
+	},
+	render: HTMLRenderer.render
+};
 
-// Auto install itself on ContentSite
-Website.prototype.render = Render;
-module.exports = Render;
+if(window.Website) window.Website.render.markdown = MarkdownRenderer;
+module.exports = MarkdownRenderer;

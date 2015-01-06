@@ -9,7 +9,7 @@ module.exports = {
     },
     resolve: {
     	alias: {
-    		'Promise':'promiscuous'
+    		'Promise':'bluebird'
     	}
     },
     output: {
