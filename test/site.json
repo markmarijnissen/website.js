@@ -1,0 +1,10 @@
+{
+	"config":{
+	},
+	"sitemap":{
+		"/test": {"title": "Home", "content":{"content":"index"}  },
+		"/test/page2":{"title": "Page2","content":"page2" },
+		"/test/page3":{"title": "Page3","content":"page3" },
+		"/*":{"title":"not found!","content":"notfound"}
+	}
+}

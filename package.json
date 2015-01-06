@@ -1,0 +1,37 @@
+{
+  "name": "ng-content-site",
+  "version": "0.1.0",
+  "description": "Create a contend-based site with AngularJS",
+  "main": "ng-content-site.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markmarijnissen/ng-content-site.git"
+  },
+  "keywords": [
+    "angularjs",
+    "content",
+    "blog",
+    "static",
+    "site"
+  ],
+  "author": "Mark Marijnissen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/markmarijnissen/ng-content-site/issues"
+  },
+  "homepage": "https://github.com/markmarijnissen/ng-content-site",
+  "dependencies": {
+    "dom-delegate": "^2.0.3",
+    "js-object-clone": "^0.4.1",
+    "marked": "^0.3.2",
+    "mini-router": "^0.1.0",
+    "page": "^1.5.0",
+    "pegasus": "git://github.com/typicode/pegasus",
+    "polyfill-function-prototype-bind": "0.0.1",
+    "promiscuous": "^0.6.0",
+    "router": "^1.0.0-beta.2"
+  }
+}
