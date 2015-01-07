@@ -44,52 +44,68 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	function http(url,json,cb) {
-	  var xhr = new XMLHttpRequest();
-	  xhr.open('GET', url);
-	  xhr.onreadystatechange = function(cb) {
-	   if (xhr.readyState == 4 && cb) {
-	      var data;
-	      if(json){
-	          try {
-	            data = JSON.parse(xhr.responseText);
-	          } catch (e) {}
-	        } else {
-	          data = xhr.responseText;
-	        }
-	        if(xhr.status === 200){
-	          cb(null,data);
-	        } else {
-	          cb(xhr.status,xhr);
-	        }
-	      }
-	  };
-	  xhr.send();
-	  return xhr;
+	function getFirebaseData(url,fix,callback){
+		var ref = new Firebase(url);
+		ref.once('value',function(snap){
+			var data = fix? fixSitemap(snap.val()): snap.val();
+			if(data){
+				callback(null,data);
+			} else {
+				callback('no data',null);
+			}
+		});
 	}
 
-	var HttpPlugin = {
-	  created: function(options){
-	    this.options.contentExt = this.options.contentExt || '';
-	    var baseUrl = this.options.contentUrl;
-	    if(baseUrl[baseUrl.length-1] !== '/') baseUrl += '/';
-	    this.options.contentUrl = baseUrl;
-	  },
-		getContentUrl: function(url){
-			if(!url || url === '/') url = 'index';
-			if(url[0] === '/') url = url.substr(1);
-			return this.options.contentUrl + url + this.options.contentExt;
+	function fixSlash(url){
+	  return url.replace(/\\/,'/');
+	}
+
+	function fixSitemap(data) {
+		var sitemap = {};
+		Object.keys(data.sitemap).forEach(function(key){
+			sitemap[fixSlash(key)] = data.sitemap[key];
+		});
+		data.sitemap = sitemap;
+		return data;
+	}
+
+
+	var FirebasePlugin = {
+		created: function(options){
+			var self = this;
+			if(options.dataUrl[options.dataUrl.length-1] !== '/') {
+				options.dataUrl += '/';
+			}
+
+			dataRef = new Firebase(this.options.dataUrl);
+			dataRef.on('value',function(snap){
+				self.data = fixSitemap(snap.val());
+			});
+
+			sitemapRef = new Firebase(this.options.dataUrl + 'sitemap');
+			sitemapRef.on('child_changed',function(snap){
+				self.setDataForUrl(fixSlash(snap.key()),snap.val());
+			});
+
+			if(options.contentUrl[options.contentUrl.length-1] !== '/') {
+				options.contentUrl += '/';
+			}
+
+			contentRef = new Firebase(this.options.contentUrl);
+			contentRef.on('child_changed',function(snap){
+				self.setContent(snap.key(),snap.val());
+			});
 		},
 		getContent: function(id,callback){
-			return http(this.api.getContentUrl.call(this,id),false,callback);
+			return getFirebaseData(this.options.contentUrl + id,false,callback);
 		},
 		getData: function(callback){
-			return http(this.options.dataUrl,true,callback);
+			return getFirebaseData(this.options.dataUrl,true,callback);
 		}
 	};
 
-	if(window.Website) window.Website.plugins.http = HttpPlugin;
-	module.exports = HttpPlugin;
+	if(window.Website) window.Website.plugins.firebase = FirebasePlugin;
+	module.exports = FirebasePlugin;
 
 /***/ }
 /******/ ])

@@ -3,9 +3,10 @@ var path = require('path');
 module.exports = {
     entry: {
         'website': "./src/website",
-        'website.api.http': "./src/api/http",
-        'website.api.firebase': "./src/api/firebase",
-        'website.render.markdown':'./src/render/markdown'
+        'website.plugins.http': "./src/plugins/http",
+        'website.plugins.firebase': "./src/plugins/firebase",
+        'website.plugins.markdown':'./src/plugins/markdown',
+        'website.plugins.render':'./src/plugins/render',
     },
     resolve: {
     	alias: {

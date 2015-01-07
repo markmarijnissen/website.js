@@ -1,6 +1,6 @@
 var getElement = require('../utils/getCachedElementById');
 
-var HTMLRenderer = {
+var RenderPlugin = {
 	render: function render(data) {
 		if(data.title)	{
 			document.title = data.title;
@@ -22,5 +22,5 @@ var HTMLRenderer = {
 	}
 };
 
-if(window.Website) window.Website.render.html = HTMLRenderer;
+if(window.Website) window.Website.plugins.render = RenderPlugin;
 module.exports = HTMLRenderer;

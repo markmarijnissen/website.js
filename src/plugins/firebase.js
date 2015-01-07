@@ -1,12 +1,12 @@
-var Promise = require('Promise');
-
-function getFirebaseData(url,fix){
-	return new Promise(function(resolve,reject){
-		var ref = new Firebase(url);
-		ref.once('value',function(snap){
-			var data = fix? fixSitemap(snap.val()): snap.val();
-			resolve(data);
-		},reject);
+function getFirebaseData(url,fix,callback){
+	var ref = new Firebase(url);
+	ref.once('value',function(snap){
+		var data = fix? fixSitemap(snap.val()): snap.val();
+		if(data){
+			callback(null,data);
+		} else {
+			callback('no data',null);
+		}
 	});
 }
 
@@ -24,7 +24,7 @@ function fixSitemap(data) {
 }
 
 
-var API = {
+var FirebasePlugin = {
 	created: function(options){
 		var self = this;
 		if(options.dataUrl[options.dataUrl.length-1] !== '/') {
@@ -50,13 +50,13 @@ var API = {
 			self.setContent(snap.key(),snap.val());
 		});
 	},
-	getContent: function(id){
-		return getFirebaseData(this.options.contentUrl + id);
+	getContent: function(id,callback){
+		return getFirebaseData(this.options.contentUrl + id,false,callback);
 	},
-	getData: function(){
-		return getFirebaseData(this.options.dataUrl,true);
+	getData: function(callback){
+		return getFirebaseData(this.options.dataUrl,true,callback);
 	}
 };
 
-if(window.Website) window.Website.api.firebase = API;
-module.exports = API;
+if(window.Website) window.Website.plugins.firebase = FirebasePlugin;
+module.exports = FirebasePlugin;

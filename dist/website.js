@@ -44,323 +44,146 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	window.setImmediate = setTimeout;
-	__webpack_require__(6);
-	__webpack_require__(5);
-	var Promise = __webpack_require__(7);
-	var Router = __webpack_require__(8);
-	var smokesignals = __webpack_require__(4);
-	var defaultApi = __webpack_require__(1);
-	var HTMLRenderer = __webpack_require__(2);
+	__webpack_require__(4);
+
+	var Router = __webpack_require__(5);
+	var smokesignals = __webpack_require__(3);
 
 	function Website(options){
 		var self = this;
-		// add events
-		smokesignals.convert(self);
-
-		// options: object containing website options
 		self.options = options = options || {};
-
-		// router
+		
+		// Setup Router
 		self.router = new Router({
 			html5: options.html5,
 			base: options.base,
 			interceptClicks: options.interceptClicks,
-			callback: routerCallback.bind(self)
+			callback: routerCallback.bind(this)
 		});
 
-		self.data = null;
-		// data = {
-		//    sitemap: { ... }
-		//    ...
-		// }
+		// Setup Website State + Events
+		smokesignals.convert(this);
 
-		self.sitemap = {};
-		// sitemap: {
-		//   "/path": {
-		//     title: "My Page"
-		//     content: "id"   or  { "nav":"id", "main":"id" }
-		//   }
-		// }
+		// Add core flow
+		this.addPlugin(options.core || Website.plugins.core);
+		
+		// Add plugins
+		if(options.plugins){
+			options.plugins.forEach(function(plugin){
+				self.addPlugin(plugin);
+			});
+		}
 
-		self.content = {};
-		// content = { "id": ... }
-
-		createRenderer.call(self);
-		// self.render(data);
-
-		createAPI.call(self);
-		// self.api = {
-		//    getData(){ ... },
-		//    getContent(id){ ... }  // methods return a promise
-		// };
-
-		self.emit('created',options);
-
-
-		getData.call(self);
-		// data = sitemap['/path']
-	    // + data.content: `id` is replaced with actual content
-	    // + data.params: route parameters
-
-		// self.navigate(url);  // navigate to an url
-		// self.refresh();      // re-render current url
+		this.emit('created',options);
+		this.getData();
 	}
-	Website.api = {
-
-	};
-	Website.render = {
-		html: HTMLRenderer
+	Website.plugins = {
+		core: __webpack_require__(1)
 	};
 
-	/**
-	 * API to get all site data, see constructor
-	 */
-	Website.prototype.api = defaultApi;
+	Website.prototype.addPlugin = function(plugin){
+		var self = this;
+		['created',
+		 'getData','gotData','gotDataForUrl',
+		 'navigated',
+		 'getContent','gotContent',
+		 'render','rendered',
+		 'dataError','navigationError','contentError']
+		.forEach(function(event){
+			if(typeof plugin[event] === 'function') {
+				self.state.on(event,plugin[event]);
+			}
+		});
+	};
 
-	/**
-	 * render function to render content, see constructor
-	 */
-	Website.prototype.render = HTMLRenderer.render;
+	Website.prototype.getData = function(callback){
+		var self = this;
+		self.emit('getData',function gotDataCallback(err,data){
+			if(err){
+				self.state.emit('gotData',data);
+			} else {
+				self.state.emit('dataError',err);
+			}
+			if(callback && callback.apply){
+				callback.apply(self,err,data);
+			}
+		});
+	};
 
-	/**
-	 * Trigger navigation
-	 * @param  {string} url
-	 */
-	Website.prototype.navigate = function(url){
+	Website.prototype.navigate = function navigate(url){
 		this.router.set(url);
 	};
 
-	/**
-	 * Re-render the current route and page.
-	 */
-	Website.prototype.refresh = function(){
-		this.router.set();
-	};
-
-	function contentHasId(obj,val){
-		if(obj === val) return true;
-		if(typeof obj !== 'object') return false;
-		for(var key in obj){
-			if(obj[key] === val) return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Live update site content (e.g. when using Firebase)
-	 *
-	 * @param {string} id
-	 * @param {...} content
-	 */
-	Website.prototype.setContent = function(id,content){
-		// set content
-		this.content[id] = content;
-		this.emit('gotContent',id,content);
-
-		// refresh page if needed
-		var data = this.sitemap[this.router.currentRoute];
-		if(data && data.content && contentHasId(data.content,id))
-		{
-			this.refresh();
-		}
-	};
-
-	/**
-	 * Live update sitemap page metadata (e.g. when using Firebase)
-	 *
-	 * @param {string} url
-	 * @param {Object} data
-	 */
-	Website.prototype.setDataForUrl = function(url,data){
-		// set content
-		url = this.router.normalize(url);
-		this.sitemap[url] = data;
-		this.emit('gotDataForUrl',url,data);
-
-		// refresh page if needed
-		if(this.router.currentRoute === url) this.refresh();
-	};
-
-	//////////////////////////////////
-	// Private Methods
-
-	// Add event listeners to an API or RENDERER
-	function addEventListeners(self,eventCallbacks){
-		['created','gotData','navigated',
-		 'before render','rendered',
-		 'gotContent','gotDataForUrl']
-		.forEach(function(event){
-			if(eventCallbacks[event]) {
-				self.on(event,eventCallbacks[event]);
-			}
-		});
-	}
-
-	function emitDataError(err){
-		this.emit('dataError',err);
-	}
-
-	function emitContentError(err){
-		this.emit('contentError',err);
-	}
-
-	function emitNavigationError(err){
-		this.emit('navigationError',err);
-	}
-
-	/**
-	 * createAPI()
-	 *
-	 * - bind methods to the website instance
-	 * - use default API methods when missing
-	 * - add event listeners
-	 */
-	function createAPI(){
+	Website.prototype.getContent = function getContent(obj,callback){
 		var self = this;
-		if(self.options.api) {
-			self.api = self.options.api;
-		}
-		['getData','getContent'].forEach(function(method){
-			// use default-api when missing
-			if(!self.api[method]) {
-				self.api[method] = defaultApi[method];
-			}
-			// bind functions to 'self'
-			self.api[method] = self.api[method].bind(self);
-		});
-		addEventListeners(self,self.api);
-	}
-
-	/**
-	 * createRenderer()
-	 *
-	 * options.render is a render function or object
-	 *
-	 * object in the form of
-	 *
-	 * {
-	 *    event: callback
-	 *    render: renderFunction
-	 * }
-	 */
-	function createRenderer(){
-		if(typeof this.options.render === 'object') {
-			addEventListeners(this,this.options.render);
-			this.render = this.options.render.render.bind(this);
-		}
-	}
-
-	/**
-	 * private method: getData
-	 *
-	 * uses api.getData() to
-	 * - fetch data,
-	 * - update sitemap
-	 * - trigger router
-	 */
-	function getData(){
-		var self = this;
-		self.api.getData()
-			.then(function(data){
-				// validate data
-				if(typeof data !== 'object' || data === null || typeof data.sitemap !== 'object') {
-					self.api.onDataError('data is invalid');
-					return;
-				}
-				// set data
-				self.data = data;
-
-				// create sitemap (with normalized urls) and add routes
-				Object.keys(data.sitemap).forEach(function(_url){
-					// save normalized sitemap entry
-					var url = self.router.normalize(_url);
-					self.sitemap[url] = data.sitemap[_url];
-					self.sitemap[url].url = url;
-					self.emit('gotDataForUrl',url,self.sitemap[url]);
-					// Add Route Handler
-					self.router.add(url);
+		
+		// fetch a single piece of content
+		if(typeof obj !== 'object'){
+			// cached
+			if(self.content[obj]) {
+				if(callback) callback(obj,self.content[id]);
+			// not cached
+			} else {
+				self.emit('getContent',obj,function getContentCallback(err,content){
+					if(err){
+						self.emit('contentError',err);
+					} else {
+						self.content[obj] = content;
+						self.emit('gotContent',obj,content);
+					}
+					if(callback && callback.apply){
+						callback.apply(self,err,content);
+					}
 				});
+			}
 
-				// trigger event and navigate to current location!
-				self.emit('gotData',data);
-				self.refresh();
-			},emitDataError.bind(self));
-	}
-
-	/**
-	 * on navigation
-	 *
-	 * @param  {object} params object with route parameters
-	 * @param  {string} url    original route url
-	 */
-	function routerCallback(params,url){
-		var self = this;
-		var data = self.sitemap[url];
-		if(data){
-			data.params = params;
-			this.emit('navigated',data);
-
-			data = Object.clone(data,true);
-			getAllContent.call(this,data.content)
-				.then(function gotContent(content){
-					data.content = content;
-					self.emit('before render',data);
-					self.render(data);
-					self.emit('rendered',data);
-					self.emit('rendered '+url,data);
-				},emitContentError.bind(self));
+		// fetch multiple pieces of content
 		} else {
-			emitNavigationError.call(this,'not_found');
-		}
-	}
+			var keys = Object.keys(obj);
+			var todo = keys.length;
+			var result = {};
+			var error = null;
 
-	/**
-	 * getAllContent(obj)
-	 *
-	 * takes a string with contentId
-	 * or an object with mapping {"name":"contentId"}
-	 * and fetches all content using api.getContent(id)
-	 *
-	 * when all content is fetched, returns the original
-	 * object with the actual content.
-	 *
-	 * @param  {object|string} content string or object
-	 * @return {Promise}
-	 */
-	function getAllContent(obj){
-		if(typeof obj === 'undefined' || obj === null) {
-			return new Promise(function(resolve) {
-				resolve(null);
-			});
-		}
-		var self = this;
-		var isString = typeof obj === 'string';
-		if(isString) obj = {value:obj};
-		var keys = Object.keys(obj);
-		var promises = keys.map(function(key){
-			var contentId = obj[key];
-			return new Promise(function(resolve,reject){
-				if(self.content[contentId]) {
-					resolve(self.content[contentId]);
-				} else {
-					self.api.getContent(contentId).then(resolve,reject);
-				}
-			}).then(function(content){
-				self.content[contentId] = content;
-				self.emit('gotContent',contentId,content);
-				return contentId;
-			});
-		});
-
-		return Promise.all(promises)
-			.then(function(ids){
-				var result = {};
-				keys.forEach(function(key,i){
-					result[key] = self.content[ids[i]];
+			keys.forEach(function(key){
+				self.getContent(obj[key],function(err,content){
+					todo--;
+					if(!err) {
+						result[key] = content;
+					} else {
+						error = err;
+					}
+					if(todo === 0){
+						callback(error,result);
+					}
 				});
-				return isString? result.value: result;
 			});
+		}
+	};
+
+	Website.prototype.render = function(data){
+		this.emit('render',data);
+		this.emit('rendered',data);
+		this.emit('rendered '+this.router.currentRoute,data);
+	};
+
+	Website.prototype.refresh = function(){
+		this.emit('navigated',this.router.currentParams,this.router.currentRoute);
+	};
+
+	Website.prototype.setData = function(data){
+		this.emit('gotData',data);
+	};
+
+	Website.prototype.setDataForUrl = function(url,data){
+		this.emit('gotDataForUrl',url,data);
+	};
+
+	Website.prototype.setContent = function(id,content){
+		this.emit('gotContent',id,content);
+	};
+
+	function routerCallback(params,url){
+		this.emit('navigated',params,url);
 	}
 
 	// export as global var
@@ -371,61 +194,93 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var API = {
-		getData: function(){
-			throw new Error('API.getData() not implemented!');
-			// Should return a Promise with all 'data'
+	__webpack_require__(7);
+
+	function checkContentForId(metadata,val){
+		if(!metadata || !metadata.content) return false;
+		if(metadata.content === val) return true;
+		if(typeof metadata !== 'object') return false;
+		for(var key in metadata.content){
+			if(metadata.content[key] === val) return true;
+		}
+		return false;
+	}
+
+	module.exports = {
+		created: function(){
+			this.url = null;   // store url
+			this.data = null;  // store data
+			this.sitemap = {}; // store sitemap
+			this.content = {}; // cache content
 		},
-		getContent: function(id){
-			throw new Error('API.getContent(id) not implemented!');
-			// Show return a Promise which returns the HTML
-		}
-	};
-	module.exports = API;
+		gotData: function(data){
+			var self = this;
 
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var getElement = __webpack_require__(3);
-
-	var HTMLRenderer = {
-		render: function render(data) {
-			if(data.title)	{
-				document.title = data.title;
+			// validate data
+			if(typeof data !== 'object' || data === null || typeof data.sitemap !== 'object') {
+				self.emit('dataError','data is invalid');
+				return;
 			}
-			if(typeof data.content === 'string'){
-				document.body.innerHTML = data.content;
-			} else if(typeof data.content === 'object'){
-				var keys = Object.keys(data.content);
-				var layoutIndex = keys.indexOf('layout');
-				if(layoutIndex >= 0){
-					keys.splice(layoutIndex,1);
-					keys.unshift('layout');
-				}
-				keys.map(function(id){
-						var el = getElement(id);
-						if(el) el.innerHTML = data.content[id];
+			// save data
+			self.data = data;
+
+			// Update sitemap
+			Object.keys(data.sitemap).forEach(function(_url){
+				var url = self.router.normalize(_url);
+				self.setDataForUrl(url,self.sitemap[url]);
+			});
+		},
+		gotDataForUrl: function(url,data){
+			this.sitemap[url] = data;	// save in sitemap
+			this.router.add(url);		// add new route
+			if(url === this.url) this.refresh(); // refresh if needed
+		},
+		navigated: function(params,url){
+			this.navigating = true;
+			var self = this;
+			
+			// save url
+			self.url = url;
+
+			// get sitemap page metadata
+			var data = self.sitemap[url];
+			if(data){
+				// enhance data with URL and params
+				data = Object.clone(data,true);
+				data.url = url;
+				data.params = params;
+
+				// replace data.content with actual content
+				self.getContent(data.content,function gotContent(err,content){
+						if(!err){
+							data.content = content;
+							self.render(data);
+						}	
 					});
+			} else {
+				self.emit('navigationError','not_found');
 			}
-		}
+			this.navigating = false;
+		},
+		gotContent: function(id,content){
+			this.content[id] = content;
+			if(!this.navigating && checkContentForId(this.sitemap[this.url],id))
+			{  // TODO what if gotContent is triggered while navigating?
+				this.refresh();
+			}
+		},
+		
+		render: null,
+		rendered: null,
+
+		dataError: null,
+		contentError: null,
+		navigationError: null
 	};
 
-	if(window.Website) window.Website.render.html = HTMLRenderer;
-	module.exports = HTMLRenderer;
-
 /***/ },
+/* 2 */,
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var elCache = {};
-	module.exports = function(id){
-		if(elCache[id]) return elCache[id];
-		return document.getElementById(id);
-	};
-
-/***/ },
-/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
@@ -436,7 +291,7 @@
 	    old = global.smokesignals;
 	}
 
-	__webpack_require__(10);
+	__webpack_require__(8);
 
 	module.exports = smokesignals;
 
@@ -450,7 +305,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
@@ -481,7 +336,180 @@
 
 
 /***/ },
-/* 6 */
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(9);
+	var bodyDelegate = __webpack_require__(10)();
+	document.addEventListener('DOMContentLoaded',function(){
+	  bodyDelegate.root(document.body);
+	},false);
+
+	function Router(options) {
+	    var self = this;
+	    options = options || [];
+	    this._routes = [];
+	    this.currentRoute = null;
+
+	    if(options.routes) {
+	      for(var id in options.routes){
+	        this.add(options.routes[id],id);
+	      }
+	    }
+	    this.base = '';
+	    if(options.base){
+	      this.base = options.base;
+	      if(this.base[0] !== '/')
+	        this.base = '/' + this.base;
+	      if(this.base[this.base.length-1] === '/')
+	        this.base = this.base.substr(0,this.base.length-1);
+	    }
+	    if(typeof options.callback === 'function') {
+	      this._callback = options.callback;
+	    }
+
+	    // override default click intercept, if wanted
+	    if(typeof options.startClickIntercept === 'function'){
+	      self.startClickIntercept = startClickIntercept.bind(self);
+	    }
+	    if(typeof options.stopClickIntercept === 'function'){
+	      self.stopClickIntercept = stopClickIntercept.bind(self);
+	    }
+
+	    if(typeof options.html5 === 'undefined') options.html5 = true;
+	    if(options.html5 === true && 'onpopstate' in window){
+	      this.html5 = true;
+	      window.addEventListener('popstate',function(ev){
+	        self.set(ev.state.url);
+	      });
+	    } else {
+	      this.html5 = false;
+	      window.addEventListener('hashchange',function(ev){
+	        self.set(window.location.hash.substr(1));
+	      });
+	    }
+	    if(this.html5 || options.interceptClicks){
+	      self.startClickIntercept();
+	    }
+	}
+
+	Router.prototype.normalize = function(url){
+	  url = url || '/';
+	  if(url[0] === '#') {
+	    url = url.substr(1);
+	  }
+	  if(url.startsWith(location.origin)){
+	    url = url.substr(location.origin.length);
+	  }
+	  if(url.startsWith(this.base)){
+	    url = url.substr(this.base.length);
+	  }
+	  if(url[0] !== '/') url = '/' + url;
+	  if(url.length > 1 && url[url.length-1] === '/') url = url.substr(0,url.length-1);
+	  return url;
+	};
+
+	Router.prototype.add = function RouterAdd(route,callback) {
+	  route = this.normalize(route);
+	  var i,normalizedRoute = route;
+	  
+	  // check if route already exists
+	  for(i = 0, len = this._routes.length; i<len; i++){
+	    if(this._routes[i].route === normalizedRoute) {
+	      this._routes[i] = callback || this._callback;
+	      return;
+	    }
+	  }
+
+	  // check for 'otherwise' route
+	  if(route === '/*') {
+	    this._otherwise = callback || this._callback;
+	    return route;
+	  }
+
+	  // add route
+	  var keys;
+	  var params = route.match(/:[a-zA-Z0-9]+/g) || [];
+	  keys = params.map(function(key){
+	    return key.substr(1);
+	  });
+	  for (i = params.length - 1; i >= 0; i--) {
+	    route = route.replace(params[i],'([^\/]+)');
+	  }
+	  route = '^' + route.replace(/\//g,'\\/') + '$';
+
+	  this._routes.push({
+	    route: normalizedRoute,
+	    regex: new RegExp(route),
+	    params: keys,
+	    callback: callback || this._callback
+	  });
+	  return route;
+	};
+
+	Router.prototype.setCallback = function RouterSetCallback(fn){
+	  this._callback = fn;
+	};
+
+	Router.prototype.set = function RouterSet(url) {
+	  var current = this.html5? location.href: location.hash.substr(1);
+	  url = this.normalize(url || current);
+	  if(this.html5){
+	    history.pushState({url:url},url,url);
+	  } else {
+	    location.hash = url;
+	  }
+	  var found = false,
+	      i = this._routes.length - 1,
+	      matches,
+	      params = {};
+
+	  while(i >= 0 && !found) {
+	    matches = url.match(this._routes[i].regex);
+	    if(matches !== null) {
+	      found = true;
+	      matches = matches.splice(1);
+	      this._routes[i].params.forEach(function(key){
+	        params[key] = matches[key];
+	      });
+	      this._routes[i].callback(params,this._routes[i].route);
+	      this.currentRoute = this._routes[i].route;
+	      this.currentParams = params;
+	    }
+	    i--;
+	  }
+	  if(!found && this._otherwise) {
+	    this._otherwise(params,'/*');
+	    found = true;
+	  }
+	  return found;
+	};
+
+	Router.prototype.interceptClick = function(ev){
+	  var url = ev.target.getAttribute('href');
+	  if(url){
+	    url = this.normalize(url);
+	    if(url.substr(0,4) !== 'http' && this.set(url)) {
+	      ev.preventDefault();
+	    }
+	  }
+	};
+
+	Router.prototype.startClickIntercept = function(){
+	  bodyDelegate.on('click','a',this.interceptClick.bind(this));
+	  window.del = bodyDelegate;
+	};
+
+
+	Router.prototype.stopClickIntercept = function(){
+	  bodyDelegate.destroy();
+	};
+
+	module.exports = Router;
+
+/***/ },
+/* 6 */,
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -713,300 +741,7 @@
 
 
 /***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**@license MIT-promiscuous-©Ruben Verborgh*/
-	(function (func, obj) {
-	  // Type checking utility function
-	  function is(type, item) { return (typeof item)[0] == type; }
-
-	  // Creates a promise, calling callback(resolve, reject), ignoring other parameters.
-	  function Promise(callback, handler) {
-	    // The `handler` variable points to the function that will
-	    // 1) handle a .then(resolved, rejected) call
-	    // 2) handle a resolve or reject call (if the first argument === `is`)
-	    // Before 2), `handler` holds a queue of callbacks.
-	    // After 2), `handler` is a finalized .then handler.
-	    handler = function pendingHandler(resolved, rejected, value, queue, then, i) {
-	      queue = pendingHandler.q;
-
-	      // Case 1) handle a .then(resolved, rejected) call
-	      if (resolved != is) {
-	        return Promise(function (resolve, reject) {
-	          queue.push({ p: this, r: resolve, j: reject, 1: resolved, 0: rejected });
-	        });
-	      }
-
-	      // Case 2) handle a resolve or reject call
-	      // (`resolved` === `is` acts as a sentinel)
-	      // The actual function signature is
-	      // .re[ject|solve](<is>, success, value)
-
-	      // Check if the value is a promise and try to obtain its `then` method
-	      if (value && (is(func, value) | is(obj, value))) {
-	        try { then = value.then; }
-	        catch (reason) { rejected = 0; value = reason; }
-	      }
-	      // If the value is a promise, take over its state
-	      if (is(func, then)) {
-	        function valueHandler(resolved) {
-	          return function (value) { then && (then = 0, pendingHandler(is, resolved, value)); };
-	        }
-	        try { then.call(value, valueHandler(1), rejected = valueHandler(0)); }
-	        catch (reason) { rejected(reason); }
-	      }
-	      // The value is not a promise; handle resolve/reject
-	      else {
-	        // Replace this handler with a finalized resolved/rejected handler
-	        handler = function (Resolved, Rejected) {
-	          // If the Resolved or Rejected parameter is not a function,
-	          // return the original promise (now stored in the `callback` variable)
-	          if (!is(func, (Resolved = rejected ? Resolved : Rejected)))
-	            return callback;
-	          // Otherwise, return a finalized promise, transforming the value with the function
-	          return Promise(function (resolve, reject) { finalize(this, resolve, reject, value, Resolved); });
-	        };
-	        // Resolve/reject pending callbacks
-	        i = 0;
-	        while (i < queue.length) {
-	          then = queue[i++];
-	          // If no callback, just resolve/reject the promise
-	          if (!is(func, resolved = then[rejected]))
-	            (rejected ? then.r : then.j)(value);
-	          // Otherwise, resolve/reject the promise with the result of the callback
-	          else
-	            finalize(then.p, then.r, then.j, value, resolved);
-	        }
-	      }
-	    };
-	    // The queue of pending callbacks; garbage-collected when handler is resolved/rejected
-	    handler.q = [];
-
-	    // Create and return the promise (reusing the callback variable)
-	    callback.call(callback = { then:  function (resolved, rejected) { return handler(resolved, rejected); },
-	                               catch: function (rejected)           { return handler(0,        rejected); } },
-	                  function (value)  { handler(is, 1,  value); },
-	                  function (reason) { handler(is, 0, reason); });
-	    return callback;
-	  }
-
-	  // Finalizes the promise by resolving/rejecting it with the transformed value
-	  function finalize(promise, resolve, reject, value, transform) {
-	    setImmediate(function () {
-	      try {
-	        // Transform the value through and check whether it's a promise
-	        value = transform(value);
-	        transform = value && (is(obj, value) | is(func, value)) && value.then;
-	        // Return the result if it's not a promise
-	        if (!is(func, transform))
-	          resolve(value);
-	        // If it's a promise, make sure it's not circular
-	        else if (value == promise)
-	          reject(TypeError());
-	        // Take over the promise's state
-	        else
-	          transform.call(value, resolve, reject);
-	      }
-	      catch (error) { reject(error); }
-	    });
-	  }
-
-	  // Export the main module
-	  module.exports = Promise;
-
-	  // Creates a resolved promise
-	  Promise.resolve = ResolvedPromise;
-	  function ResolvedPromise(value) { return Promise(function (resolve) { resolve(value); }); }
-
-	  // Creates a rejected promise
-	  Promise.reject = function (reason) { return Promise(function (resolve, reject) { reject(reason); }); };
-
-	  // Transforms an array of promises into a promise for an array
-	  Promise.all = function (promises) {
-	    return Promise(function (resolve, reject, count, values) {
-	      // Array of collected values
-	      values = [];
-	      // Resolve immediately if there are no promises
-	      count = promises.length || resolve(values);
-	      // Transform all elements (`map` is shorter than `forEach`)
-	      promises.map(function (promise, index) {
-	        ResolvedPromise(promise).then(
-	          // Store the value and resolve if it was the last
-	          function (value) {
-	            values[index] = value;
-	            --count || resolve(values);
-	          },
-	          // Reject if one element fails
-	          reject);
-	      });
-	    });
-	  };
-	})('f', 'o');
-
-
-/***/ },
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(11);
-	var bodyDelegate = __webpack_require__(12)();
-	document.addEventListener('DOMContentLoaded',function(){
-	  bodyDelegate.root(document.body);
-	},false);
-
-	function Router(options) {
-	    var self = this;
-	    options = options || [];
-	    this._routes = [];
-	    this.currentRoute = null;
-
-	    if(options.routes) {
-	      for(var id in options.routes){
-	        this.add(options.routes[id],id);
-	      }
-	    }
-	    this.base = '';
-	    if(options.base){
-	      this.base = options.base;
-	      if(this.base[0] !== '/')
-	        this.base = '/' + this.base;
-	      if(this.base[this.base.length-1] === '/')
-	        this.base = this.base.substr(0,this.base.length-1);
-	    }
-	    if(typeof options.callback === 'function') {
-	      this._callback = options.callback;
-	    }
-
-	    // override default click intercept, if wanted
-	    if(typeof options.startClickIntercept === 'function'){
-	      self.startClickIntercept = startClickIntercept.bind(self);
-	    }
-	    if(typeof options.stopClickIntercept === 'function'){
-	      self.stopClickIntercept = stopClickIntercept.bind(self);
-	    }
-
-	    if(typeof options.html5 === 'undefined') options.html5 = true;
-	    if(options.html5 === true && 'onpopstate' in window){
-	      this.html5 = true;
-	      window.addEventListener('popstate',function(ev){
-	        self.set(ev.state.url);
-	      });
-	    } else {
-	      this.html5 = false;
-	      window.addEventListener('hashchange',function(ev){
-	        self.set(window.location.hash.substr(1));
-	      });
-	    }
-	    if(this.html5 || options.interceptClicks){
-	      self.startClickIntercept();
-	    }
-	}
-
-	Router.prototype.normalize = function(url){
-	  url = url || '/';
-	  if(url[0] === '#') {
-	    url = url.substr(1);
-	  }
-	  if(url.startsWith(location.origin)){
-	    url = url.substr(location.origin.length);
-	  }
-	  if(url.startsWith(this.base)){
-	    url = url.substr(this.base.length);
-	  }
-	  if(url[0] !== '/') url = '/' + url;
-	  if(url.length > 1 && url[url.length-1] === '/') url = url.substr(0,url.length-1);
-	  return url;
-	};
-
-	Router.prototype.add = function RouterAdd(route,callback) {
-	  route = this.normalize(route);
-	  var normalizedRoute = route;
-	  if(route === '/*') {
-	    this._otherwise = callback || this._callback;
-	    return route;
-	  }
-	  var keys;
-	  var params = route.match(/:[a-zA-Z0-9]+/g) || [];
-	  keys = params.map(function(key){
-	    return key.substr(1);
-	  });
-	  for (var i = params.length - 1; i >= 0; i--) {
-	    route = route.replace(params[i],'([^\/]+)');
-	  }
-	  route = '^' + route.replace(/\//g,'\\/') + '$';
-
-	  this._routes.push({
-	    route: normalizedRoute,
-	    regex: new RegExp(route),
-	    params: keys,
-	    callback: callback || this._callback
-	  });
-	  return route;
-	};
-
-	Router.prototype.setCallback = function RouterSetCallback(fn){
-	  this._callback = fn;
-	};
-
-	Router.prototype.set = function RouterSet(url) {
-	  var current = this.html5? location.href: location.hash.substr(1);
-	  url = this.normalize(url || current);
-	  if(this.html5){
-	    history.pushState({url:url},url,url);
-	  } else {
-	    location.hash = url;
-	  }
-	  var found = false,
-	      i = this._routes.length - 1,
-	      matches,
-	      params = {};
-
-	  while(i >= 0 && !found) {
-	    matches = url.match(this._routes[i].regex);
-	    if(matches !== null) {
-	      found = true;
-	      matches = matches.splice(1);
-	      this._routes[i].params.forEach(function(key){
-	        params[key] = matches[key];
-	      });
-	      this._routes[i].callback(params,this._routes[i].route);
-	      this.currentRoute = this._routes[i].route;
-	    }
-	    i--;
-	  }
-	  if(!found && this._otherwise) {
-	    this._otherwise(params,'/*');
-	    found = true;
-	  }
-	  return found;
-	};
-
-	Router.prototype.interceptClick = function(ev){
-	  var url = ev.target.getAttribute('href');
-	  if(url){
-	    url = this.normalize(url);
-	    if(url.substr(0,4) !== 'http' && this.set(url)) {
-	      ev.preventDefault();
-	    }
-	  }
-	};
-
-	Router.prototype.startClickIntercept = function(){
-	  bodyDelegate.on('click','a',this.interceptClick.bind(this));
-	  window.del = bodyDelegate;
-	};
-
-
-	Router.prototype.stopClickIntercept = function(){
-	  bodyDelegate.destroy();
-	};
-
-	module.exports = Router;
-
-/***/ },
-/* 9 */,
-/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	smokesignals = {
@@ -1085,7 +820,7 @@
 
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
@@ -1116,7 +851,7 @@
 
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint browser:true, node:true*/
@@ -1131,7 +866,7 @@
 	 * @copyright The Financial Times Limited [All Rights Reserved]
 	 * @license MIT License (see LICENSE.txt)
 	 */
-	var Delegate = __webpack_require__(13);
+	var Delegate = __webpack_require__(11);
 
 	module.exports = function(root) {
 	  return new Delegate(root);
@@ -1141,7 +876,7 @@
 
 
 /***/ },
-/* 13 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint browser:true, node:true*/

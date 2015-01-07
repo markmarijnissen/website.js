@@ -9,61 +9,48 @@ npm install websitejs
 bower install websitejs
 ```
 
-### The Idea
+## The Idea
 
-**Website.js** does for you 
+**website.js** manages the lifecycle of a webpage for you.
 
-* Get the site metadata with the **API** (i.e. site config, sitemap and page metadata)
-* Handle navigation
-* Fetch content with the **API**
-* And render the page with the **Renderer**
+It handles
 
-You can customize
+1. Getting website metadata (i.e. config, sitemap, page metadata)
+2. Responding to URL changes (Router)
+3. Fetching content (i.e. Markdown or HTML)
+4. Rendering a page
 
-* The API: How to fetch site metadata and content.
-* The Renderer: How to render the page.
+Using plugins and events, **website.js** is super-flexible.
 
-I've included two API's to fetch data:
+Available plugins:
 
-* A HTTP API (Ajax)
-* A Firebase API
+* HTTP: Fetch website metadata and content using a XHR request (AJAX)
+* Firebase: Fetch website metadata and content using Firebase (and live-update your site!)
+* Markdown: Convert content from Markdown into HTML
+* Render: Insert HTML content into DOM-elements (using the element id)
 
-And two simple Renderers:
+There is one special plugin: The Core Plugin.
 
-* A HTML Renderer
-* A Markdown Renderer (same as HTML, only parses Markdown first)
+The Core Plugin handles the flow:
 
-So if you have
+1. On `created`, fetch the website data with `getData(callback)`
+2. On `gotData`, check `data.sitemap` for urls.
+3  Trigger `gotDataForUrl(url,pageData)` for every url to populate the router.
+3. When the router fires `navigated`,
+4. `getContent(id,callback)` to fetch content
+5. `gotContent(id,content)` to transform content
+6. `render(pageData)` the page
+7. `rendered(pageData)` do stuff after rendering
+8. `rendered /your/url(pageData)` do stuff after rendering a specific URL.
 
-* An `index.html` with a nice layout.
-* A `site.json` to describe your site metadata.
-* A few `page.md` for your page content.
+## Getting Started
 
-Then you'll have a static site up and running in no time!
-
-### Example
-
-Run a static file server, then navigate to `/example`.
-```
-npm install node-static -g
-static .
-```
-
-## Usage
-
-1. Create a Website.s instance
-2. Site Metadata (e.g. `site.json`)
-3. The API (to fetch site metadata and content)
-4. The Renderer (to render the page)
-4. Website.js events
-
-### 1. Create a Website 
 ```javascript
 var site = new Website({
-	html5: true      // default true, if browser supports it
-	base: '/example' // base url, all navigation is relative to this url
-	api: { ... }     // An API to fetch data & content
-	render: { ... }  // A Renderer to render your site
+	html5: true       // default true, if browser supports it
+	base: '/example'  // base url, all navigation is relative to this url
+	core: { ... }     // Override the core plugin (optional)
+	plugins: [ ... ]  // Add plugins
 })
 
 // navigate programatically to a url
@@ -71,19 +58,82 @@ site.navigate('/page1');
 
 // re-render current url/route
 site.refresh();
-
-// listen to website' evens (see below)
-site.on(event,function(...){
-	// `this` is the website instance
-})
-site.once(event,function);
-site.off(event,function);
-
 ```
 
-### 2. Site Metadata
+## Events
 
-[Example](https://github.com/markmarijnissen/website.js/blob/master/example/site.json) site metadata:
+Add logic by listening to events:
+
+```javascript
+	// listen to website' events (see below)
+	site.on(eventName,function(...){
+		// `this` is the website instance
+	})
+	site.once(eventName,function);
+	site.off(eventName,function);
+```
+
+Events are fired roughly in the following sequence:
+
+1. When creating new Website:
+	1. `created(options)`
+	2. `gotDataForUrl(url,pageData)`
+	3. `gotData(data)`
+
+2. When navigating:
+	1. `navigated(url)`
+	2. `gotContent(id,content)` - this is called for every id
+	3. `render(pageData)`
+	4. `rendered(pageData)`
+	5. `renderer [url](pageData)`
+
+## Plugins
+
+A plugin is an object that listens to events. Simply use eventNames as attributes. For example, the MarkdownPlugin transforms content into markdown:
+
+```javascript
+var MarkdownPlugin = {
+	gotContent: function(id,content){
+		this.content[id] = marked(content);
+	},
+	// render: function() { ... }
+	// etc
+};
+```
+
+In addition to the events, plugins allow two extra methods:
+
+```javascript
+{
+	getData: function(callback){
+		// fetch your data
+		callback(err,data);
+	},
+	getContent: function(id,callback){
+		// fetch your content
+		callback(err,content)
+	}
+}
+```
+
+### Core Plugin
+
+The Core Plugin takes care of the lifecycle of the website.
+
+The Core plugin must know the urls of your website, and what content to fetch for every url.
+
+This is why `getData` must return data following a convention:
+
+1. `data.sitemap` contains a map from `url` to `pageData`. 
+2. `pageData.content` is an string (contentId) or an object (`{name:contentId,name:contentId}`).
+3. `render(pageData)` is called with page metadata, only contentId has been replaced with actual content.
+
+You still need to provide plugins for
+* `getData(callback)`
+* `getContent(id,callback)`
+* `render(pageData)`
+
+Site metadata ([Example](https://github.com/markmarijnissen/website.js/blob/master/example/site.json)):
 
 ```javascript
 var data = {
@@ -104,43 +154,24 @@ var data = {
 }
 ```
 
-* `data` must have a `sitemap`
-* `sitemap` is a mapping from `url` to `pageMetadata`.
-* `pageMetadata` must have `content`
-* `content` points to a `contentId` in a String or Object.
+### HTTP Plugin
 
-### 3. The API
+// todo - document config options
 
-When instantiating the Website, the Site Metadata will be fetched using the API.
+### Firebase Plugin
 
-When browsing the site, content is fetched as defined in `pageMetadata`.
+// todo - document config options
 
-```javascript
-{
-	getData: function(){
-		// `this` is the Website instance
-		// return a promise
-	},
-	getContent: function(id){
-		// `this` is the Website instance
-		// return a promise
-	}
+### Render Plugin
 
-	// + optional event listeners (see below)
-	created: function(options) { ... },
-	rendered: function(pageMetadata) { ... },
-	// and more..
-}
-```
+Renders `pageData.content` as follows:
 
-### 4. The Renderer
-In the `pageMetadata`, content is defined as a string or object.
+* For an object `{#elementId: content}`: Inserts content into element with #elementId
+* For a string: Replace document.body with content
 
-When defined as object, you have no strict 1-on-1 relationship between page and content. This allows your to create powerful rendering functions, as you can compose and reuse content througout the site.
+Note: The `#layout` element is always rendered first, allowing you to specify a layout first, then render blocks of content in that layout.
 
-The default Renderer (both HTML and Markdown) render as follows:
-
-Given the following content:
+Example:
 ```javascript
 content = {
 	"layout":"sidebar-layout.html",
@@ -149,10 +180,7 @@ content = {
 }
 ```
 
-* First, it inserts `sidebar-layout.html` in the #layout element.
-* Then, it inserts `navigation.html` and the `blog-about-js.md` in the #sidebar and #content elements.
-
-You can write a custom renderer as follows:
+You can write a custom Render plugin as follows:
 
 ```javascript
 var MyCustomRenderer = {
@@ -163,56 +191,31 @@ var MyCustomRenderer = {
 		// url parameters
 		pageMetadata.params
 
-		// content (the contentId has been replaced with acutal content)
+		// content (the contentId has been replaced with actual content)
 		pageMetadata.content
 	}
-
-	// + optional event listeners (see below)
-	created: function(options) { ... },
-	rendered: function(pageMetadata) { ... },
-	// and more..
 }
 
 // later:
-var website = new Website({render: MyCustomRenderer})
+var website = new Website(plugins: [ MyCustomRenderer ] })
+// or
+website.addPlugin(MyCustomRenderer)
 ```
 
-### 4. Website.js events
+### Markdown Plugin
 
-Events are fired roughly in the following sequence:
+// todo - document cofig options
 
-When creating new Website:
-
-1. `created(options)`: When instantiating the Website
-2. `gotDataForUrl(url,pageData)`: When `api.getData()` populates the sitemap, or when live-updating the sitemap with `website.setDataForUrl`.
-3. `gotData(data)`: When `api.getData()` is finished.
-
-When navigating:
-
-1. `navigated(pageData)`: When router detected navigation
-2. `gotContent(id,content)`: When `api.getContent(id)` returns new content
-3. `before render(pageData)`: Before the render function is called
-4. `rendered(pageData)`: After the render function is called
-5. `renderer [url](pageData)`: After the render function is called.
-
-When writing a custom API or Renderer, you can also listen to these events. Simply use the eventname as property. For example in the [MarkdownRenderer](https://github.com/markmarijnissen/website.js/blob/master/src/render/markdown.js):
+## Advanced features
 
 ```javascript
-var MarkdownRenderer = {
-	gotContent: function(id,content){
-		this.content[id] = marked(content);
-	},
-	render: HTMLRenderer.render
-};
-```
+// live-update your site:
+site.setData(data)
+site.setDataForUrl(url,data)
+site.setContent(id,content);
 
-**Live-update your website**
-It's also possible to live-update your website. Firebase, for example, might live-update your website.
-
-```javascript
-// Live-update site content (refreshes if needed)
-site.setContent('home','Hello world');
-
-// Live-update page metadata (refreshes if needed)
-site.setDataForUrl('/page1',{title:'Page 1', content:'page1'});
-```
+// Manually get data or content:
+site.getData(callback), callback(err,data);
+site.getContent(id,callback), callback(err,content);
+site.getContent({name:id,name:id}), callback(err,{name:content,name:content})
+``

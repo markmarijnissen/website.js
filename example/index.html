@@ -9,9 +9,9 @@
 
         <script src="https://cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
         <script src="../dist/website.js"></script>
-        <script src="../dist/website.api.http.js"></script>
-        <script src="../dist/website.api.firebase.js"></script>
-        <script src="../dist/website.render.markdown.js"></script>
+        <script src="../dist/website.plugins.http.js"></script>
+        <script src="../dist/website.plugins.render.js"></script>
+        <script src="../dist/website.plugins.markdown.js"></script>
         <script>
             window.site = new Website({
                 html5: false,
@@ -21,8 +21,11 @@
                 markdown: /\.md$/,
                 dataUrl: location.origin + '/example/site.json',
 
-                api: Website.api.http,
-                render: Website.render.markdown
+                plugins: [
+                    Website.plugins.http,
+                    Website.plugins.markdown,
+                    Website.plugins.render
+                ]
             });
         </script>
     </head>
