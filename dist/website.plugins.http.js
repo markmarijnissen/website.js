@@ -70,20 +70,20 @@
 
 	var HttpPlugin = {
 	  created: function(options){
-	    options = options.http;
-	    options.ext = options.ext || '';
-	    options.content = options.content || location.origin;
-	    if(options.content[options.content.length-1] !== '/') {
-	      options.content += '/';
+	    options.http = options.http || {};
+	    var contentFn = options.http.content;
+	    if(typeof contentFn === 'string'){
+	      var url = contentFn || location.origin;
+	      if(url[url.length-1] !== '/') {
+	        url += '/';
+	      }
+	      options.http.content = function(id){ return url + id; };
+	    } else if(typeof contentFn !== 'function'){
+	      console.error('options.http.content must be a string or function');
 	    }
 	  },
-		getContentUrl: function(url){
-			if(!url || url === '/') url = 'index';
-			if(url[0] === '/') url = url.substr(1);
-			return this.options.http.content + url + this.options.http.ext;
-		},
 		getContent: function(id,callback){
-			return http(HttpPlugin.getContentUrl.call(this,id),false,callback);
+			return http(this.options.http.content.call(this,id),false,callback);
 		},
 		getData: function(callback){
 			return http(this.options.http.data,true,callback);
