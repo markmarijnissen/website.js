@@ -33,15 +33,15 @@ There is one special plugin: The Core Plugin.
 
 The Core Plugin handles the flow:
 
-1. On `created`, fetch the website data with `getData(callback)`
-2. On `gotData`, check `data.sitemap` for urls.
-3  Trigger `gotDataForUrl(url,pageData)` for every url to populate the router.
-3. When the router fires `navigated`,
-4. `getContent(id,callback)` to fetch content
-5. `gotContent(id,content)` to transform content
-6. `render(pageData)` the page
-7. `rendered(pageData)` do stuff after rendering
-8. `rendered /your/url(pageData)` do stuff after rendering a specific URL.
+1. On `created(options)`, fetch the website data with `getData(callback)`
+2. On `gotData(data)`, check `data.sitemap` for urls.
+3. Trigger `gotDataForUrl(url,pageData)` for every url to populate the router.
+4. When the router fires `navigated`,
+5. `getContent(id,callback)` to fetch content
+6. `gotContent(id,content)` to transform content
+7. `render(pageData)` the page
+8. `rendered(pageData)` do stuff after rendering
+9. `rendered /your/url(pageData)` do stuff after rendering a specific URL.
 
 ## Getting Started
 

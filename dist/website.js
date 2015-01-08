@@ -44,22 +44,19 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(4);
+	__webpack_require__(3);
 
 	var Router = __webpack_require__(5);
-	var smokesignals = __webpack_require__(3);
+	var smokesignals = __webpack_require__(4);
 
 	function Website(options){
 		var self = this;
 		self.options = options = options || {};
-		
+		options.router = options.router || {};
+		options.router.callback = routerCallback.bind(this);
+
 		// Setup Router
-		self.router = new Router({
-			html5: options.html5,
-			base: options.base,
-			interceptClicks: options.interceptClicks,
-			callback: routerCallback.bind(this)
-		});
+		self.router = new Router(options.router);
 
 		// Setup Website State + Events
 		smokesignals.convert(this);
@@ -91,7 +88,7 @@
 		 'dataError','navigationError','contentError']
 		.forEach(function(event){
 			if(typeof plugin[event] === 'function') {
-				self.state.on(event,plugin[event]);
+				self.on(event,plugin[event]);
 			}
 		});
 	};
@@ -99,13 +96,13 @@
 	Website.prototype.getData = function(callback){
 		var self = this;
 		self.emit('getData',function gotDataCallback(err,data){
-			if(err){
-				self.state.emit('gotData',data);
+			if(!err){
+				self.emit('gotData',data);
 			} else {
-				self.state.emit('dataError',err);
+				self.emit('dataError',err);
 			}
-			if(callback && callback.apply){
-				callback.apply(self,err,data);
+			if(callback && callback.call){
+				callback.call(self,err,data);
 			}
 		});
 	};
@@ -116,12 +113,11 @@
 
 	Website.prototype.getContent = function getContent(obj,callback){
 		var self = this;
-		
 		// fetch a single piece of content
 		if(typeof obj !== 'object'){
 			// cached
 			if(self.content[obj]) {
-				if(callback) callback(obj,self.content[id]);
+				if(callback) callback.call(self,null,self.content[obj]);
 			// not cached
 			} else {
 				self.emit('getContent',obj,function getContentCallback(err,content){
@@ -131,8 +127,8 @@
 						self.content[obj] = content;
 						self.emit('gotContent',obj,content);
 					}
-					if(callback && callback.apply){
-						callback.apply(self,err,content);
+					if(callback && callback.call){
+						callback.call(self,err,content);
 					}
 				});
 			}
@@ -148,12 +144,12 @@
 				self.getContent(obj[key],function(err,content){
 					todo--;
 					if(!err) {
-						result[key] = content;
+						result[key] = self.content[obj[key]];
 					} else {
 						error = err;
 					}
 					if(todo === 0){
-						callback(error,result);
+						callback.call(self,error,result);
 					}
 				});
 			});
@@ -225,10 +221,12 @@
 			self.data = data;
 
 			// Update sitemap
-			Object.keys(data.sitemap).forEach(function(_url){
-				var url = self.router.normalize(_url);
-				self.setDataForUrl(url,self.sitemap[url]);
+			Object.keys(data.sitemap).forEach(function(url){
+				self.setDataForUrl(self.router.normalize(url),data.sitemap[url]);
 			});
+
+			// Trigger router for first load
+			self.router.set();
 		},
 		gotDataForUrl: function(url,data){
 			this.sitemap[url] = data;	// save in sitemap
@@ -255,12 +253,15 @@
 						if(!err){
 							data.content = content;
 							self.render(data);
-						}	
+						} else {
+							console.error('navigated getContent error',err);
+						}
+						self.navigating = false;	
 					});
 			} else {
 				self.emit('navigationError','not_found');
+				self.navigating = false;
 			}
-			this.navigating = false;
 		},
 		gotContent: function(id,content){
 			this.content[id] = content;
@@ -281,31 +282,6 @@
 /***/ },
 /* 2 */,
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
-	var old;
-
-	if ('smokesignals' in global) {
-	    existed = true;
-	    old = global.smokesignals;
-	}
-
-	__webpack_require__(8);
-
-	module.exports = smokesignals;
-
-	if (existed) {
-	    global.smokesignals = old;
-	}
-	else {
-	    delete global.smokesignals;
-	}
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
@@ -334,6 +310,31 @@
 	  };
 	}
 
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
+	var old;
+
+	if ('smokesignals' in global) {
+	    existed = true;
+	    old = global.smokesignals;
+	}
+
+	__webpack_require__(8);
+
+	module.exports = smokesignals;
+
+	if (existed) {
+	    global.smokesignals = old;
+	}
+	else {
+	    delete global.smokesignals;
+	}
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 5 */
@@ -379,13 +380,13 @@
 	    if(typeof options.html5 === 'undefined') options.html5 = true;
 	    if(options.html5 === true && 'onpopstate' in window){
 	      this.html5 = true;
-	      window.addEventListener('popstate',function(ev){
-	        self.set(ev.state.url);
+	      window.addEventListener('popstate',function RouterOnPopState(ev){
+	        self.set(ev.state.url,true);
 	      });
 	    } else {
 	      this.html5 = false;
-	      window.addEventListener('hashchange',function(ev){
-	        self.set(window.location.hash.substr(1));
+	      window.addEventListener('hashchange',function RouterOnHashChange(ev){
+	        self.set(window.location.hash.substr(1),true);
 	      });
 	    }
 	    if(this.html5 || options.interceptClicks){
@@ -451,12 +452,12 @@
 	  this._callback = fn;
 	};
 
-	Router.prototype.set = function RouterSet(url) {
+	Router.prototype.set = function RouterSet(url,silent) {
 	  var current = this.html5? location.href: location.hash.substr(1);
 	  url = this.normalize(url || current);
-	  if(this.html5){
+	  if(this.html5 && !silent){
 	    history.pushState({url:url},url,url);
-	  } else {
+	  } else if(!silent){
 	    location.hash = url;
 	  }
 	  var found = false,
@@ -489,7 +490,12 @@
 	  var url = ev.target.getAttribute('href');
 	  if(url){
 	    url = this.normalize(url);
-	    if(url.substr(0,4) !== 'http' && this.set(url)) {
+	    if(url.substr(0,4) !== 'http') {
+	      if(this.html5){
+	        history.pushState({url:url},url,url);
+	      } else {
+	        location.hash = url;
+	      }
 	      ev.preventDefault();
 	    }
 	  }

@@ -29,10 +29,12 @@ module.exports = {
 		self.data = data;
 
 		// Update sitemap
-		Object.keys(data.sitemap).forEach(function(_url){
-			var url = self.router.normalize(_url);
-			self.setDataForUrl(url,self.sitemap[url]);
+		Object.keys(data.sitemap).forEach(function(url){
+			self.setDataForUrl(self.router.normalize(url),data.sitemap[url]);
 		});
+
+		// Trigger router for first load
+		self.router.set();
 	},
 	gotDataForUrl: function(url,data){
 		this.sitemap[url] = data;	// save in sitemap
@@ -59,12 +61,15 @@ module.exports = {
 					if(!err){
 						data.content = content;
 						self.render(data);
-					}	
+					} else {
+						console.error('navigated getContent error',err);
+					}
+					self.navigating = false;	
 				});
 		} else {
 			self.emit('navigationError','not_found');
+			self.navigating = false;
 		}
-		this.navigating = false;
 	},
 	gotContent: function(id,content){
 		this.content[id] = content;

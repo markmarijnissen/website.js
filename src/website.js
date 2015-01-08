@@ -6,14 +6,11 @@ var smokesignals = require('smokesignals');
 function Website(options){
 	var self = this;
 	self.options = options = options || {};
-	
+	options.router = options.router || {};
+	options.router.callback = routerCallback.bind(this);
+
 	// Setup Router
-	self.router = new Router({
-		html5: options.html5,
-		base: options.base,
-		interceptClicks: options.interceptClicks,
-		callback: routerCallback.bind(this)
-	});
+	self.router = new Router(options.router);
 
 	// Setup Website State + Events
 	smokesignals.convert(this);
@@ -45,7 +42,7 @@ Website.prototype.addPlugin = function(plugin){
 	 'dataError','navigationError','contentError']
 	.forEach(function(event){
 		if(typeof plugin[event] === 'function') {
-			self.state.on(event,plugin[event]);
+			self.on(event,plugin[event]);
 		}
 	});
 };
@@ -53,13 +50,13 @@ Website.prototype.addPlugin = function(plugin){
 Website.prototype.getData = function(callback){
 	var self = this;
 	self.emit('getData',function gotDataCallback(err,data){
-		if(err){
-			self.state.emit('gotData',data);
+		if(!err){
+			self.emit('gotData',data);
 		} else {
-			self.state.emit('dataError',err);
+			self.emit('dataError',err);
 		}
-		if(callback && callback.apply){
-			callback.apply(self,err,data);
+		if(callback && callback.call){
+			callback.call(self,err,data);
 		}
 	});
 };
@@ -70,12 +67,11 @@ Website.prototype.navigate = function navigate(url){
 
 Website.prototype.getContent = function getContent(obj,callback){
 	var self = this;
-	
 	// fetch a single piece of content
 	if(typeof obj !== 'object'){
 		// cached
 		if(self.content[obj]) {
-			if(callback) callback(obj,self.content[id]);
+			if(callback) callback.call(self,null,self.content[obj]);
 		// not cached
 		} else {
 			self.emit('getContent',obj,function getContentCallback(err,content){
@@ -85,8 +81,8 @@ Website.prototype.getContent = function getContent(obj,callback){
 					self.content[obj] = content;
 					self.emit('gotContent',obj,content);
 				}
-				if(callback && callback.apply){
-					callback.apply(self,err,content);
+				if(callback && callback.call){
+					callback.call(self,err,content);
 				}
 			});
 		}
@@ -102,12 +98,12 @@ Website.prototype.getContent = function getContent(obj,callback){
 			self.getContent(obj[key],function(err,content){
 				todo--;
 				if(!err) {
-					result[key] = content;
+					result[key] = self.content[obj[key]];
 				} else {
 					error = err;
 				}
 				if(todo === 0){
-					callback(error,result);
+					callback.call(self,error,result);
 				}
 			});
 		});

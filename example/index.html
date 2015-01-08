@@ -7,24 +7,29 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <script src="https://cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
         <script src="../dist/website.js"></script>
         <script src="../dist/website.plugins.http.js"></script>
-        <script src="../dist/website.plugins.render.js"></script>
         <script src="../dist/website.plugins.markdown.js"></script>
+        <script src="../dist/website.plugins.render.js"></script>
+        <script src="../dist/website.plugins.log.js"></script>
         <script>
             window.site = new Website({
-                html5: false,
-                base: '/example',
-                interceptClicks: true,
-                contentUrl: location.origin + '/example/content/',
+                router: {
+                    html5: false,
+                    base: '/example',
+                    interceptClicks: true,
+                },
+                http: {
+                    content: location.origin + '/example/content/',
+                    data: location.origin + '/example/site.json',   
+                },
                 markdown: /\.md$/,
-                dataUrl: location.origin + '/example/site.json',
 
                 plugins: [
                     Website.plugins.http,
                     Website.plugins.markdown,
-                    Website.plugins.render
+                    Website.plugins.render,
+                    Website.plugins.log
                 ]
             });
         </script>

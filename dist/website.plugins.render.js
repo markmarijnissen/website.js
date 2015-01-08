@@ -69,7 +69,7 @@
 	};
 
 	if(window.Website) window.Website.plugins.render = RenderPlugin;
-	module.exports = HTMLRenderer;
+	module.exports = RenderPlugin;
 
 /***/ },
 /* 1 */,

@@ -44,54 +44,28 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	function http(url,json,cb) {
-	  var xhr = new XMLHttpRequest();
-	  xhr.open('GET', url);
-	  xhr.onreadystatechange = function() {
-	   if (xhr.readyState == 4 && cb) {
-	      var data;
-	      if(json){
-	          try {
-	            data = JSON.parse(xhr.responseText);
-	          } catch (e) {}
-	        } else {
-	          data = xhr.responseText;
-	        }
-	        if(xhr.status === 200){
-	          cb(null,data);
-	        } else {
-	          cb(xhr.status,xhr);
-	        }
-	      }
-	  };
-	  xhr.send();
-	  return xhr;
+	function createLog(type){
+		return function log(){
+			var args = Array.prototype.slice.apply(arguments);
+			args.unshift(type);
+			console.log.apply(console,args);
+		};
 	}
 
-	var HttpPlugin = {
-	  created: function(options){
-	    options = options.http;
-	    options.ext = options.ext || '';
-	    options.content = options.content || location.origin;
-	    if(options.content[options.content.length-1] !== '/') {
-	      options.content += '/';
-	    }
-	  },
-		getContentUrl: function(url){
-			if(!url || url === '/') url = 'index';
-			if(url[0] === '/') url = url.substr(1);
-			return this.options.http.content + url + this.options.http.ext;
-		},
-		getContent: function(id,callback){
-			return http(HttpPlugin.getContentUrl.call(this,id),false,callback);
-		},
-		getData: function(callback){
-			return http(this.options.http.data,true,callback);
+	var LOG_ALL_EVENTS = ['created','gotData','gotDataForUrl','navigated','gotContent','render','rendered','dataError','contentError','navigationError'];
+
+	var LogPlugin = {
+		created: function(options){
+			var events = options.log || LOG_ALL_EVENTS;
+			if(typeof events === 'string') events = events.split(',');
+			events.forEach(createLog);
+			if(events.indexOf('created') >= 0){
+				createLog('created')(options);
+			}
 		}
 	};
-
-	if(window.Website) window.Website.plugins.http = HttpPlugin;
-	module.exports = HttpPlugin;
+	if(window.Website) window.Website.plugins.log = LogPlugin;
+	module.exports = LogPlugin;
 
 /***/ }
 /******/ ])
