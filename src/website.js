@@ -117,7 +117,7 @@ Website.prototype.render = function(data){
 };
 
 Website.prototype.refresh = function(){
-	this.emit('navigated',this.router.currentParams,this.router.currentRoute);
+	this.emit('navigated',this.router.current.params,this.router.current.route);
 };
 
 Website.prototype.setData = function(data){
