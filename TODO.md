@@ -46,7 +46,7 @@ Basic version:
 - 'content' tab; List + Markdown editor
 
 Extra
-- 'sitemap' tab; List + JSON editor
+- 'sitemap' tab; List + JSON Schema editor
 
 Extra 2
 - 'sitemap' tab + JSON Schema

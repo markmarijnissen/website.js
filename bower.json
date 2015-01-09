@@ -1,0 +1,23 @@
+{
+  "name": "website.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/markmarijnissen/website.js",
+  "authors": [
+    "Mark Marijnissen <markmarijnissen@gmail.com>"
+  ],
+  "description": "A static website generator that runs in your browser",
+  "main": "dist/website.min.js",
+  "keywords": [
+    "website",
+    "router",
+    "cms"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

@@ -4,7 +4,9 @@
   "description": "Create a contend-based site with AngularJS",
   "main": "ng-content-site.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "uglify":"rm -f dist/*.min.js && for f in dist/*.js; do uglifyjs -c -m -o ${f%.js}.min.js $f; done",
+    "prepublish":"webpack && npm run uglify"
   },
   "repository": {
     "type": "git",

@@ -44,10 +44,10 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(5);
+	__webpack_require__(4);
 	__webpack_require__(3);
-	var Router = __webpack_require__(6);
-	var smokesignals = __webpack_require__(4);
+	var Router = __webpack_require__(5);
+	var smokesignals = __webpack_require__(6);
 
 	function Website(options){
 		var self = this;
@@ -203,8 +203,8 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(8);
-	var isEqual = __webpack_require__(10);
+	__webpack_require__(10);
+	var isEqual = __webpack_require__(9);
 
 	function checkContentForId(metadata,val){
 		if(!metadata || !metadata.content) return false;
@@ -339,31 +339,6 @@
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
-	var old;
-
-	if ('smokesignals' in global) {
-	    existed = true;
-	    old = global.smokesignals;
-	}
-
-	__webpack_require__(9);
-
-	module.exports = smokesignals;
-
-	if (existed) {
-	    global.smokesignals = old;
-	}
-	else {
-	    delete global.smokesignals;
-	}
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
 	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
 	if (!Function.prototype.bind) {
 	  Function.prototype.bind = function (oThis) {
@@ -392,7 +367,7 @@
 
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {function Router(options) {
@@ -542,8 +517,172 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)(module)))
 
 /***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
+	var old;
+
+	if ('smokesignals' in global) {
+	    existed = true;
+	    old = global.smokesignals;
+	}
+
+	__webpack_require__(8);
+
+	module.exports = smokesignals;
+
+	if (existed) {
+	    global.smokesignals = old;
+	}
+	else {
+	    delete global.smokesignals;
+	}
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
 /* 7 */,
 /* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	smokesignals = {
+	    convert: function(obj, handlers) {
+	        // we store the list of handlers as a local variable inside the scope
+	        // so that we don't have to add random properties to the object we are
+	        // converting. (prefixing variables in the object with an underscore or
+	        // two is an ugly solution)
+	        // we declare the variable in the function definition to use two less
+	        // characters (as opposed to using 'var ').  I consider this an inelegant
+	        // solution since smokesignals.convert.length now returns 2 when it is
+	        // really 1, but doing this doesn't otherwise change the functionallity of
+	        // this module, so we'll go with it for now
+	        handlers = {};
+
+	        // add a listener
+	        obj.on = function(eventName, handler) {
+	            // either use the existing array or create a new one for this event
+	            (handlers[eventName] || (handlers[eventName] = []))
+	                // add the handler to the array
+	                .push(handler);
+
+	            return obj;
+	        }
+
+	        // add a listener that will only be called once
+	        obj.once = function(eventName, handler) {
+	            // create a wrapper listener, that will remove itself after it is called
+	            function wrappedHandler() {
+	                // remove ourself, and then call the real handler with the args
+	                // passed to this wrapper
+	                handler.apply(obj.off(eventName, wrappedHandler), arguments);
+	            }
+	            // in order to allow that these wrapped handlers can be removed by
+	            // removing the original function, we save a reference to the original
+	            // function
+	            wrappedHandler.h = handler;
+
+	            // call the regular add listener function with our new wrapper
+	            return obj.on(eventName, wrappedHandler);
+	        }
+
+	        // remove a listener
+	        obj.off = function(eventName, handler) {
+	            // loop through all handlers for this eventName, assuming a handler
+	            // was passed in, to see if the handler passed in was any of them so
+	            // we can remove it
+	            for (var list = handlers[eventName], i = 0; handler && list && list[i]; i++) {
+	                // either this item is the handler passed in, or this item is a
+	                // wrapper for the handler passed in.  See the 'once' function
+	                list[i] != handler && list[i].h != handler ||
+	                    // remove it!
+	                    list.splice(i--,1);
+	            }
+	            // if i is 0 (i.e. falsy), then there are no items in the array for this
+	            // event name (or the array doesn't exist)
+	            if (!i) {
+	                // remove the array for this eventname (if it doesn't exist then
+	                // this isn't really hurting anything)
+	                delete handlers[eventName];
+	            }
+	            return obj;
+	        }
+
+	        obj.emit = function(eventName) {
+	            // loop through all handlers for this event name and call them all
+	            for(var list = handlers[eventName], i = 0; list && list[i];) {
+	                list[i++].apply(obj, list.slice.call(arguments, 1));
+	            }
+	            return obj;
+	        }
+
+	        return obj;
+	    }
+	}
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+	var baseCreateCallback = __webpack_require__(14),
+	    baseIsEqual = __webpack_require__(15);
+
+	/**
+	 * Performs a deep comparison between two values to determine if they are
+	 * equivalent to each other. If a callback is provided it will be executed
+	 * to compare values. If the callback returns `undefined` comparisons will
+	 * be handled by the method instead. The callback is bound to `thisArg` and
+	 * invoked with two arguments; (a, b).
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Objects
+	 * @param {*} a The value to compare.
+	 * @param {*} b The other value to compare.
+	 * @param {Function} [callback] The function to customize comparing values.
+	 * @param {*} [thisArg] The `this` binding of `callback`.
+	 * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+	 * @example
+	 *
+	 * var object = { 'name': 'fred' };
+	 * var copy = { 'name': 'fred' };
+	 *
+	 * object == copy;
+	 * // => false
+	 *
+	 * _.isEqual(object, copy);
+	 * // => true
+	 *
+	 * var words = ['hello', 'goodbye'];
+	 * var otherWords = ['hi', 'goodbye'];
+	 *
+	 * _.isEqual(words, otherWords, function(a, b) {
+	 *   var reGreet = /^(?:hello|hi)$/i,
+	 *       aGreet = _.isString(a) && reGreet.test(a),
+	 *       bGreet = _.isString(b) && reGreet.test(b);
+	 *
+	 *   return (aGreet || bGreet) ? (aGreet == bGreet) : undefined;
+	 * });
+	 * // => true
+	 */
+	function isEqual(a, b, callback, thisArg) {
+	  return baseIsEqual(a, b, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 2));
+	}
+
+	module.exports = isEqual;
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -772,145 +911,6 @@
 	        equals: equals
 	    }));
 	})(this);
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	smokesignals = {
-	    convert: function(obj, handlers) {
-	        // we store the list of handlers as a local variable inside the scope
-	        // so that we don't have to add random properties to the object we are
-	        // converting. (prefixing variables in the object with an underscore or
-	        // two is an ugly solution)
-	        // we declare the variable in the function definition to use two less
-	        // characters (as opposed to using 'var ').  I consider this an inelegant
-	        // solution since smokesignals.convert.length now returns 2 when it is
-	        // really 1, but doing this doesn't otherwise change the functionallity of
-	        // this module, so we'll go with it for now
-	        handlers = {};
-
-	        // add a listener
-	        obj.on = function(eventName, handler) {
-	            // either use the existing array or create a new one for this event
-	            (handlers[eventName] || (handlers[eventName] = []))
-	                // add the handler to the array
-	                .push(handler);
-
-	            return obj;
-	        }
-
-	        // add a listener that will only be called once
-	        obj.once = function(eventName, handler) {
-	            // create a wrapper listener, that will remove itself after it is called
-	            function wrappedHandler() {
-	                // remove ourself, and then call the real handler with the args
-	                // passed to this wrapper
-	                handler.apply(obj.off(eventName, wrappedHandler), arguments);
-	            }
-	            // in order to allow that these wrapped handlers can be removed by
-	            // removing the original function, we save a reference to the original
-	            // function
-	            wrappedHandler.h = handler;
-
-	            // call the regular add listener function with our new wrapper
-	            return obj.on(eventName, wrappedHandler);
-	        }
-
-	        // remove a listener
-	        obj.off = function(eventName, handler) {
-	            // loop through all handlers for this eventName, assuming a handler
-	            // was passed in, to see if the handler passed in was any of them so
-	            // we can remove it
-	            for (var list = handlers[eventName], i = 0; handler && list && list[i]; i++) {
-	                // either this item is the handler passed in, or this item is a
-	                // wrapper for the handler passed in.  See the 'once' function
-	                list[i] != handler && list[i].h != handler ||
-	                    // remove it!
-	                    list.splice(i--,1);
-	            }
-	            // if i is 0 (i.e. falsy), then there are no items in the array for this
-	            // event name (or the array doesn't exist)
-	            if (!i) {
-	                // remove the array for this eventname (if it doesn't exist then
-	                // this isn't really hurting anything)
-	                delete handlers[eventName];
-	            }
-	            return obj;
-	        }
-
-	        obj.emit = function(eventName) {
-	            // loop through all handlers for this event name and call them all
-	            for(var list = handlers[eventName], i = 0; list && list[i];) {
-	                list[i++].apply(obj, list.slice.call(arguments, 1));
-	            }
-	            return obj;
-	        }
-
-	        return obj;
-	    }
-	}
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-	var baseCreateCallback = __webpack_require__(14),
-	    baseIsEqual = __webpack_require__(15);
-
-	/**
-	 * Performs a deep comparison between two values to determine if they are
-	 * equivalent to each other. If a callback is provided it will be executed
-	 * to compare values. If the callback returns `undefined` comparisons will
-	 * be handled by the method instead. The callback is bound to `thisArg` and
-	 * invoked with two arguments; (a, b).
-	 *
-	 * @static
-	 * @memberOf _
-	 * @category Objects
-	 * @param {*} a The value to compare.
-	 * @param {*} b The other value to compare.
-	 * @param {Function} [callback] The function to customize comparing values.
-	 * @param {*} [thisArg] The `this` binding of `callback`.
-	 * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
-	 * @example
-	 *
-	 * var object = { 'name': 'fred' };
-	 * var copy = { 'name': 'fred' };
-	 *
-	 * object == copy;
-	 * // => false
-	 *
-	 * _.isEqual(object, copy);
-	 * // => true
-	 *
-	 * var words = ['hello', 'goodbye'];
-	 * var otherWords = ['hi', 'goodbye'];
-	 *
-	 * _.isEqual(words, otherWords, function(a, b) {
-	 *   var reGreet = /^(?:hello|hi)$/i,
-	 *       aGreet = _.isString(a) && reGreet.test(a),
-	 *       bGreet = _.isString(b) && reGreet.test(b);
-	 *
-	 *   return (aGreet || bGreet) ? (aGreet == bGreet) : undefined;
-	 * });
-	 * // => true
-	 */
-	function isEqual(a, b, callback, thisArg) {
-	  return baseIsEqual(a, b, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 2));
-	}
-
-	module.exports = isEqual;
 
 
 /***/ },
