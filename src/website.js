@@ -1,5 +1,5 @@
 require('polyfill-function-prototype-bind');
-
+require('mini-router/ClickInterceptor');
 var Router = require('mini-router');
 var smokesignals = require('smokesignals');
 
@@ -14,6 +14,9 @@ function Website(options){
 
 	// Setup Website State + Events
 	smokesignals.convert(this);
+
+	// Setup content cache
+	self.content = {};
 
 	// Add core flow
 	this.addPlugin(options.core || Website.plugins.core);
@@ -79,7 +82,7 @@ Website.prototype.getContent = function getContent(obj,callback){
 					self.emit('contentError',err);
 				} else {
 					self.content[obj] = content;
-					self.emit('gotContent',obj,content);
+					self.emit('gotContent',obj);
 				}
 				if(callback && callback.call){
 					callback.call(self,err,content);
@@ -98,7 +101,7 @@ Website.prototype.getContent = function getContent(obj,callback){
 			self.getContent(obj[key],function(err,content){
 				todo--;
 				if(!err) {
-					result[key] = self.content[obj[key]];
+					result[key] = self.content[obj[key]]; //use cached, transformed content, rather than initial retrieved content!
 				} else {
 					error = err;
 				}
@@ -116,8 +119,18 @@ Website.prototype.render = function(data){
 	this.emit('rendered '+this.router.currentRoute,data);
 };
 
-Website.prototype.refresh = function(){
-	this.emit('navigated',this.router.current.params,this.router.current.route);
+var REFRESH_TIMEOUT = false;
+Website.prototype.refresh = function(debounce){
+	var self = this;
+	
+	if(typeof debounce === 'undefined') {
+		self.emit('navigated',self.router.current.params,self.router.current.route);
+	} else {
+		clearTimeout(REFRESH_TIMEOUT);
+		REFRESH_TIMEOUT = setTimeout(function(){
+			self.emit('navigated',self.router.current.params,self.router.current.route);
+		},debounce || 0);
+	}
 };
 
 Website.prototype.setData = function(data){

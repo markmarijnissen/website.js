@@ -1,19 +1,19 @@
 {
   "content" : {
-    "defaultLayout" : "<h1>Default Layout</h1> <div id=\"sidebar\">Default Sidebar</div> <div id=\"content\">Default Content</div>",
-    "home-md" : "Homepage/ Goto <a href=\"/example/page2\">page2</a>",
-    "notfound" : "**Not found**, goto <a href=\"/example\">HOME</a>",
-    "pagea-md" : "## Page A\n\nClick a [link](/example/page3)\n\n*markdown* is _fun_",
-    "pageb-md" : "Hello Page B, goto <a href=\"/example\">home</a>",
-    "sidebara-md" : "**Sidebar A**",
-    "sidebarb-md" : "**Sidebar B**"
+    "defaultLayout-dot-html" : "<h1>Default Layout</h1> <div id=\"sidebar\">Default Sidebar</div> <div id=\"content\">Default Content</div>",
+    "home-dot-md" : "Homepage/ Goto <a href=\"/example/page2\">page2</a>",
+    "notfound-dot-html" : "**Not found**, goto <a href=\"/example\">HOME</a>",
+    "pagea-dot-md" : "## Page A\n\nClick a [link](/example/page3)\n\n*markdown* is _fun_",
+    "pageb-dot-md" : "Hello Page B, goto <a href=\"/example\">home</a>",
+    "sidebara-dot-md" : "**Sidebar A**",
+    "sidebarb-dot-md" : "**Sidebar B**"
   },
   "data" : {
     "sitemap" : {
       "\\" : {
         "content" : {
-          "content" : "home-md",
-          "layout" : "defaultLayout"
+          "content" : "home.md",
+          "layout" : "defaultLayout.html"
         },
         "title" : "Home"
       },
@@ -23,14 +23,14 @@
       },
       "\\page2" : {
         "content" : {
-          "content" : "pagea-md",
-          "layout" : "defaultLayout",
-          "sidebar" : "sidebara-md"
+          "content" : "pagea.md",
+          "layout" : "defaultLayout.html",
+          "sidebar" : "sidebara.md"
         },
         "title" : "A"
       },
       "\\page3" : {
-        "content" : "pageb-md",
+        "content" : "pageb.md",
         "title" : "B"
       }
     }

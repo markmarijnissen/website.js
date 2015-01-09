@@ -3,41 +3,6 @@
 * unit tests
 * editor
 
-## Website Plugin
-
-> getData(callback) w/ callback(err,data)
-< gotDataForUrl(url,data)
-< gotData(data)
-
-> getContent(id,callback) w/ callback(err,content)
-< gotContent(id,callback)
-
-< navigated(data)
-< render(data)
-< rendered(data)
-< rendered url(data)
-
-< dataError
-< contentError
-< navigationError
-
-+ refresh
-+ navigate
-+ setContent
-+ setDataForUrl
-
-----
-
-< gotData; this.data
-< gotDataForUrl; this.sitemap
-< gotContent; save in this.content 
-
-getData > gotData
-getContent > gotContent
-
-navigated(url) > render(data)
-
-
 ## Editor API
 
 ```javascript
@@ -62,8 +27,8 @@ editor = {
 Editor has different tabs
 * Content Tabs = Markdown/HTML editor (+ image insert tool)
 * File Tab = List/Upload/Delete (+View as thumb gallery or as list)
-* Site Tab = (json tool for site config and metadata)
-* Sitemap Tab
+* Data Tab = (json tool for site config and metadata)
+* sitemap Tab
 
 Sitemap & Content have 2 columns: Left is list of urls/ids, right is editor.
 

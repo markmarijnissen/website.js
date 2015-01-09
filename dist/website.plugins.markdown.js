@@ -45,12 +45,33 @@
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	var marked = __webpack_require__(6);
+	var marked = __webpack_require__(7);
+
+	function toFilter(filter){
+		if(typeof filter === 'string'){
+			return function(id){
+				return id.indexOf(filter) >= 0;
+			};
+		} else if(filter && filter.test){
+			return function(id){
+				return filter.test(id);
+			};
+		} else if(typeof filter === 'function'){
+			return filter;
+		} else {
+			return function() { 
+				return true; 
+			};
+		}
+	}
 
 	var MarkdownPlugin = {
+		created: function(options){
+			this.markdownFilter = toFilter(options.markdown);
+		},
 		gotContent: function(id,content){
-			if(!this.options.markdown || !this.options.markdown.test || this.options.markdown.test(id)){
-				this.content[id] = marked(content);
+			if(this.markdownFilter(id)){
+				this.content[id] = marked(this.content[id]);
 			}
 		}
 	};
@@ -60,7 +81,7 @@
 
 /***/ },
 
-/***/ 6:
+/***/ 7:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**

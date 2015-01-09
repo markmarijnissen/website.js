@@ -56,9 +56,12 @@
 
 	var LogPlugin = {
 		created: function(options){
+			var self = this;
 			var events = options.log || LOG_ALL_EVENTS;
 			if(typeof events === 'string') events = events.split(',');
-			events.forEach(createLog);
+			events.map(createLog).forEach(function(fn,i){
+				self.on(events[i],fn);
+			});
 			if(events.indexOf('created') >= 0){
 				createLog('created')(options);
 			}

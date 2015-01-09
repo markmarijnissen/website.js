@@ -1,60 +1,56 @@
-function getFirebaseData(url,fix,callback){
-	var ref = new Firebase(url);
-	ref.once('value',function(snap){
-		var data = fix? fixSitemap(snap.val()): snap.val();
-		if(data){
-			callback(null,data);
-		} else {
-			callback('no data',null);
+function fix(data){
+	if(typeof data === 'string'){
+		return data.replace(/\\/,'/').replace(/-dot-/g,'.');
+	} else if(typeof data === 'object' && typeof data.sitemap === 'object'){
+		var sitemap = {};
+		for(var key in data.sitemap){
+			sitemap[fix(key)] = data.sitemap[key];
 		}
-	});
-}
-
-function fixSlash(url){
-  return url.replace(/\\/,'/');
-}
-
-function fixSitemap(data) {
-	var sitemap = {};
-	Object.keys(data.sitemap).forEach(function(key){
-		sitemap[fixSlash(key)] = data.sitemap[key];
-	});
-	data.sitemap = sitemap;
+		data.sitemap = sitemap;
+	}
 	return data;
+}
+
+function safe(url){
+	return url.replace(/\//,'\\').replace(/\./g,'-dot-');
 }
 
 
 var FirebasePlugin = {
 	created: function(options){
 		var self = this;
-		if(options.dataUrl[options.dataUrl.length-1] !== '/') {
-			options.dataUrl += '/';
+		if(!options.firebase || !options.firebase.content || !options.firebase.data){
+			self.emit('dataError','no firebase url');
+			self.emit('contentError','no firebase url');
+			return;
 		}
 
-		dataRef = new Firebase(this.options.dataUrl);
+		if(options.firebase.content[options.firebase.content.length-1] !== '/') {
+			options.firebase.content += '/';
+		}
+		dataRef = new Firebase(options.firebase.data);
 		dataRef.on('value',function(snap){
-			self.data = fixSitemap(snap.val());
+			var data = fix(snap.val());
+			self.setData(data);
 		});
 
-		sitemapRef = new Firebase(this.options.dataUrl + 'sitemap');
-		sitemapRef.on('child_changed',function(snap){
-			self.setDataForUrl(fixSlash(snap.key()),snap.val());
-		});
-
-		if(options.contentUrl[options.contentUrl.length-1] !== '/') {
-			options.contentUrl += '/';
-		}
-
-		contentRef = new Firebase(this.options.contentUrl);
+		contentRef = new Firebase(options.firebase.content);
 		contentRef.on('child_changed',function(snap){
-			self.setContent(snap.key(),snap.val());
+			self.setContent(safe(snap.key()),snap.val());
 		});
 	},
 	getContent: function(id,callback){
-		return getFirebaseData(this.options.contentUrl + id,false,callback);
-	},
-	getData: function(callback){
-		return getFirebaseData(this.options.dataUrl,true,callback);
+		var ref = new Firebase(this.options.firebase.content + safe(id));
+		ref.once('value',function(snap){
+			var content = snap.val();
+			if(content){
+				callback(null,content);
+			} else {
+				callback('no content');
+			}
+		},function(err){
+			callback(err);
+		});
 	}
 };
 

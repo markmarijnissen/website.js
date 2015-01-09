@@ -1,4 +1,5 @@
 require('js-object-clone');
+var isEqual = require('lodash-node/modern/objects/isEqual');
 
 function checkContentForId(metadata,val){
 	if(!metadata || !metadata.content) return false;
@@ -15,7 +16,6 @@ module.exports = {
 		this.url = null;   // store url
 		this.data = null;  // store data
 		this.sitemap = {}; // store sitemap
-		this.content = {}; // cache content
 	},
 	gotData: function(data){
 		var self = this;
@@ -30,7 +30,10 @@ module.exports = {
 
 		// Update sitemap
 		Object.keys(data.sitemap).forEach(function(url){
-			self.setDataForUrl(self.router.normalize(url),data.sitemap[url]);
+			var normalizedUrl = self.router.normalize(url);
+			if(!isEqual(self.sitemap[normalizedUrl],data.sitemap[url])){
+				self.setDataForUrl(normalizedUrl,data.sitemap[url]);
+			}
 		});
 
 		// Trigger router for first load
@@ -38,8 +41,8 @@ module.exports = {
 	},
 	gotDataForUrl: function(url,data){
 		this.sitemap[url] = data;	// save in sitemap
-		this.router.add(url);		// add new route
-		if(url === this.url) this.refresh(); // refresh if needed
+		this.router.add(url);		// add new route (or override existing one)
+		if(url === this.url) this.refresh(0); // refresh if needed
 	},
 	navigated: function(params,url){
 		this.navigating = true;
@@ -61,8 +64,6 @@ module.exports = {
 					if(!err){
 						data.content = content;
 						self.render(data);
-					} else {
-						console.error('navigated getContent error',err);
 					}
 					self.navigating = false;	
 				});
@@ -72,17 +73,10 @@ module.exports = {
 		}
 	},
 	gotContent: function(id,content){
-		this.content[id] = content;
+		// Refresh page when getting content! (only when not already navigating...)
 		if(!this.navigating && checkContentForId(this.sitemap[this.url],id))
-		{  // TODO what if gotContent is triggered while navigating?
-			this.refresh();
+		{
+			this.refresh(0);
 		}
-	},
-	
-	render: null,
-	rendered: null,
-
-	dataError: null,
-	contentError: null,
-	navigationError: null
+	}
 };
