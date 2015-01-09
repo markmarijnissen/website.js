@@ -1,8 +1,8 @@
 {
-  "name": "ng-content-site",
+  "name": "websitejs",
   "version": "0.1.0",
   "description": "Create a contend-based site with AngularJS",
-  "main": "ng-content-site.js",
+  "main": "src/website.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "uglify":"rm -f dist/*.min.js && for f in dist/*.js; do uglifyjs -c -m -o ${f%.js}.min.js $f; done",
