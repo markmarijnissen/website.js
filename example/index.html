@@ -8,6 +8,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <script src="../dist/website.js"></script>
+        <!-- Firebase Example; 
+    
+             1. Uncomment the firebase library.
+             2. Uncomment a plugin: firebase (live) or firebase REST API.
+             3. Add `Website.plugins.firebase` to the plugins array (and remove `Website.plugins.http`).
+             4. Replace "YOURFIREBASE" with your firebase url.
+             5. Upload /example/site-firebase.json to your firebase
+
+         -->
+        <!-- <script src="https://cdn.firebase.com/js/client/2.1.0/firebase.js"></script> -->
+        <!-- <script src="../dist/website.plugins.firebase.js"></script> -->
+        <!-- <script src="../dist/website.plugins.firebase.rest.js"></script> -->
+
         <script src="../dist/website.plugins.http.js"></script>
         <script src="../dist/website.plugins.markdown.js"></script>
         <script src="../dist/website.plugins.render.js"></script>
@@ -23,10 +36,15 @@
                     content: location.origin + '/example/content/',
                     data: location.origin + '/example/site.json',   
                 },
+                firebase: {
+                    content: 'https://YOURFIREBASE.firebaseio.com/content/',
+                    data: 'https://YOURFIREBASE.firebaseio.com/data/',   
+                },
                 markdown: /\.md$/,
 
                 plugins: [
                     Website.plugins.http,
+                //  Website.plugins.firebase,
                     Website.plugins.markdown,
                     Website.plugins.render,
                     Website.plugins.log
