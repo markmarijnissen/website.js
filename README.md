@@ -55,6 +55,22 @@ var site = new Website({
 	plugins: [ ... ]  // Add plugins
 })
 
+ var site = new Website({
+    router: {
+        html5: false,			// default true, if browser supports it
+        base: '/example',		// base url, all navigation is relative to this url
+    },
+	core: { ... }     			// Override the core plugin (optional)
+    plugins: [
+        Website.plugins.http,
+        Website.plugins.firebase,
+        Website.plugins.markdown,
+        Website.plugins.render,
+        Website.plugins.log
+    ],
+    // plugins often add more options!
+})
+
 // navigate programatically to a url
 site.navigate('/page1');
 
@@ -265,7 +281,7 @@ site.setContent(id,content);
 site.getData(callback), callback(err,data);
 site.getContent(id,callback), callback(err,content);
 site.getContent({name:id,name:id}), callback(err,{name:content,name:content})
-``
+```
 
 ## Changelog
 
