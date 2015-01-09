@@ -1,7 +1,9 @@
 website.js
 ----------
 
-A static-site generator that runs in your browser
+> Library to run a Multi-Page-Content-Website as a Single-Page-Application.
+
+It's like a static site generator that runs in your browser.
 
 ### Installation
 ```
@@ -11,29 +13,32 @@ bower install websitejs
 
 ## The Idea
 
-**website.js** manages the lifecycle of a webpage for you.
+**website.js** is a framework for running multi-page content websites as a Single-Page-Application.
 
-It handles
+It handles the lifecycle and essential tasks of a multi-page website:
 
-1. Getting website metadata (i.e. config, sitemap, page metadata)
-2. Responding to URL changes (Router)
-3. Fetching content (i.e. Markdown or HTML)
-4. Rendering a page
+1. Fetch website metadata (config, sitemap and page metadata)
+2. Respond to URL changes (Router)
+3. Fetch content (i.e. Markdown or HTML)
+4. Render the page
 
-Using plugins and events, **website.js** is super-flexible.
+Using plugins and events, **website.js** is easy to extend and customize the above tasks.
 
-Available plugins:
+Included plugins:
 
-* HTTP: Fetch website metadata and content using a XHR request (AJAX)
-* Firebase: Fetch website metadata and content using Firebase (and live-update your site!)
-* Firebase REST: Use the Firebase' REST API instead.
-* Markdown: Convert content from Markdown into HTML
-* Render: Insert HTML content into DOM-elements (using the element id)
-* Log: Log all events that are triggered (debug)
+* For fetching website metadata and content:
+	* HTTP
+	* Firebase
+	* Firebase REST
+* For rendering
+	* Markdown: Parse (some) content as Markdown
+	* Render: Insert HTML content into DOM-elements (using the element id)
+* For debugging
+	* Log: Log all events that are triggered
 
 There is one special plugin: The Core Plugin.
 
-The Core Plugin handles the flow:
+The Core Plugin handles the flow of the website:
 
 1. On `created(options)`, fetch the website data with `getData(callback)`
 2. On `gotData(data)`, check `data.sitemap` for urls.
@@ -49,19 +54,12 @@ The Core Plugin handles the flow:
 
 ```javascript
 var site = new Website({
-	html5: true       // default true, if browser supports it
-	base: '/example'  // base url, all navigation is relative to this url
-	core: { ... }     // Override the core plugin (optional)
-	plugins: [ ... ]  // Add plugins
-})
-
- var site = new Website({
     router: {
-        html5: false,			// default true, if browser supports it
+        html5: false,			// defaults to true, if browser supports it
         base: '/example',		// base url, all navigation is relative to this url
     },
 	core: { ... }     			// Override the core plugin (optional)
-    plugins: [
+    plugins: [					// Add plugins
         Website.plugins.http,
         Website.plugins.firebase,
         Website.plugins.markdown,
@@ -76,11 +74,14 @@ site.navigate('/page1');
 
 // re-render current url/route
 site.refresh();
+site.refresh(0);   // re-render current URL after all events have fired.
+site.refresh(100); // re-render current URL after 100 ms.
+
+// Content that has been fetched (useful to transform content after a `gotContent` event)
+site.content[id];
 ```
 
 ## Events
-
-Add logic by listening to events:
 
 ```javascript
 	// listen to website' events (see below)
@@ -105,6 +106,9 @@ Events are fired roughly in the following sequence:
 	4. `rendered(pageData)`
 	5. `renderer [url](pageData)`
 
+
+Note that `gotContent(id)` only has the `id`. Use `this.content[id]` to access the content.
+
 ## Plugins
 
 A plugin is an object that listens to events. Simply use eventNames as attributes. For example, the MarkdownPlugin transforms content into markdown:
@@ -112,9 +116,11 @@ A plugin is an object that listens to events. Simply use eventNames as attribute
 ```javascript
 var MarkdownPlugin = {
 	gotContent: function(id){
-		this.content[id] = marked(this.content[id]);
+		if(this.markdownFilter(id)){
+			this.content[id] = marked(this.content[id]);
+		}
 	},
-	// render: function() { ... }
+	// created: function(options) { /* initializes the markdownFilter */ }
 	// etc
 };
 ```
