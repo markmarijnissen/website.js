@@ -44,7 +44,7 @@ Website.prototype.addPlugin = function(plugin){
 	 'render','rendered',
 	 'dataError','navigationError','contentError']
 	.forEach(function(event){
-		if(typeof plugin[event] === 'function') {
+		if(plugin && typeof plugin[event] === 'function') {
 			self.on(event,plugin[event]);
 		}
 	});
@@ -85,7 +85,7 @@ Website.prototype.getContent = function getContent(obj,callback){
 					self.emit('gotContent',obj);
 				}
 				if(callback && callback.call){
-					callback.call(self,err,content);
+					callback.call(self,err,self.content[obj]);
 				}
 			});
 		}

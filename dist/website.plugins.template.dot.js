@@ -40,13 +40,12 @@
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 0:
+/******/ ([
+/* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// see https://lodash.com/docs#template
-	var dot = __webpack_require__(8);
+	var dot = __webpack_require__(6);
 	var toFilter = __webpack_require__(2);
 
 	var TemplatePlugin = {
@@ -77,8 +76,8 @@
 	module.exports = TemplatePlugin;
 
 /***/ },
-
-/***/ 2:
+/* 1 */,
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function toFilter(filter){
@@ -100,8 +99,10 @@
 	}
 
 /***/ },
-
-/***/ 8:
+/* 3 */,
+/* 4 */,
+/* 5 */,
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;// doT.js
@@ -247,5 +248,4 @@
 
 
 /***/ }
-
-/******/ })
+/******/ ])
