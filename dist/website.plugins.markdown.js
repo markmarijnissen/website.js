@@ -45,25 +45,8 @@
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	var marked = __webpack_require__(6);
-
-	function toFilter(filter){
-		if(typeof filter === 'string'){
-			return function(id){
-				return id.indexOf(filter) >= 0;
-			};
-		} else if(filter && filter.test){
-			return function(id){
-				return filter.test(id);
-			};
-		} else if(typeof filter === 'function'){
-			return filter;
-		} else {
-			return function() { 
-				return true; 
-			};
-		}
-	}
+	var marked = __webpack_require__(9);
+	var toFilter = __webpack_require__(2);
 
 	var MarkdownPlugin = {
 		created: function(options){
@@ -81,7 +64,30 @@
 
 /***/ },
 
-/***/ 6:
+/***/ 2:
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function toFilter(filter){
+		if(typeof filter === 'string'){
+			return function(id){
+				return id.indexOf(filter) >= 0;
+			};
+		} else if(filter && filter.test){
+			return function(id){
+				return filter.test(id);
+			};
+		} else if(typeof filter === 'function'){
+			return filter;
+		} else {
+			return function() { 
+				return true; 
+			};
+		}
+	}
+
+/***/ },
+
+/***/ 9:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**

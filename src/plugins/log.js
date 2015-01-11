@@ -1,6 +1,10 @@
+require('js-object-clone');
+
 function createLog(type){
 	return function log(){
-		var args = Array.prototype.slice.apply(arguments);
+		var args = Array.prototype.slice.apply(arguments).map(function(arg){
+			return typeof arg === 'Object'? Object.clone(arg):arg;
+		});
 		args.unshift(type);
 		console.log.apply(console,args);
 	};

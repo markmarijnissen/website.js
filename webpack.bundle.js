@@ -6,6 +6,7 @@ module.exports = {
         "./src/plugins/http",
         "./src/plugins/render",
         "./src/plugins/markdown",
+        "./src/plugins/template.dot",
         "./src/plugins/log"
     ],
     resolve: {

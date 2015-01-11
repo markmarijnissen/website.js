@@ -44,10 +44,10 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(4);
-	__webpack_require__(2);
-	var Router = __webpack_require__(5);
-	var smokesignals = __webpack_require__(3);
+	__webpack_require__(5);
+	__webpack_require__(3);
+	var Router = __webpack_require__(6);
+	var smokesignals = __webpack_require__(4);
 
 	function Website(options){
 		var self = this;
@@ -203,8 +203,8 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(8);
-	var isEqual = __webpack_require__(9);
+	__webpack_require__(7);
+	var isEqual = __webpack_require__(11);
 
 	function checkContentForId(metadata,val){
 		if(!metadata || !metadata.content) return false;
@@ -287,11 +287,12 @@
 	};
 
 /***/ },
-/* 2 */
+/* 2 */,
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(4);
-	var bodyDelegate = __webpack_require__(11)(document.body);
+	__webpack_require__(5);
+	var bodyDelegate = __webpack_require__(13)(document.body);
 
 	var options = {
 	  html5: false,
@@ -335,7 +336,7 @@
 	module.exports = ClickInterceptor;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
@@ -346,7 +347,7 @@
 	    old = global.smokesignals;
 	}
 
-	__webpack_require__(7);
+	__webpack_require__(10);
 
 	module.exports = smokesignals;
 
@@ -360,7 +361,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
@@ -391,7 +392,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {function Router(options) {
@@ -538,90 +539,10 @@
 	} else {
 	  window.Router = Router;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)(module)))
 
 /***/ },
-/* 6 */,
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	smokesignals = {
-	    convert: function(obj, handlers) {
-	        // we store the list of handlers as a local variable inside the scope
-	        // so that we don't have to add random properties to the object we are
-	        // converting. (prefixing variables in the object with an underscore or
-	        // two is an ugly solution)
-	        // we declare the variable in the function definition to use two less
-	        // characters (as opposed to using 'var ').  I consider this an inelegant
-	        // solution since smokesignals.convert.length now returns 2 when it is
-	        // really 1, but doing this doesn't otherwise change the functionallity of
-	        // this module, so we'll go with it for now
-	        handlers = {};
-
-	        // add a listener
-	        obj.on = function(eventName, handler) {
-	            // either use the existing array or create a new one for this event
-	            (handlers[eventName] || (handlers[eventName] = []))
-	                // add the handler to the array
-	                .push(handler);
-
-	            return obj;
-	        }
-
-	        // add a listener that will only be called once
-	        obj.once = function(eventName, handler) {
-	            // create a wrapper listener, that will remove itself after it is called
-	            function wrappedHandler() {
-	                // remove ourself, and then call the real handler with the args
-	                // passed to this wrapper
-	                handler.apply(obj.off(eventName, wrappedHandler), arguments);
-	            }
-	            // in order to allow that these wrapped handlers can be removed by
-	            // removing the original function, we save a reference to the original
-	            // function
-	            wrappedHandler.h = handler;
-
-	            // call the regular add listener function with our new wrapper
-	            return obj.on(eventName, wrappedHandler);
-	        }
-
-	        // remove a listener
-	        obj.off = function(eventName, handler) {
-	            // loop through all handlers for this eventName, assuming a handler
-	            // was passed in, to see if the handler passed in was any of them so
-	            // we can remove it
-	            for (var list = handlers[eventName], i = 0; handler && list && list[i]; i++) {
-	                // either this item is the handler passed in, or this item is a
-	                // wrapper for the handler passed in.  See the 'once' function
-	                list[i] != handler && list[i].h != handler ||
-	                    // remove it!
-	                    list.splice(i--,1);
-	            }
-	            // if i is 0 (i.e. falsy), then there are no items in the array for this
-	            // event name (or the array doesn't exist)
-	            if (!i) {
-	                // remove the array for this eventname (if it doesn't exist then
-	                // this isn't really hurting anything)
-	                delete handlers[eventName];
-	            }
-	            return obj;
-	        }
-
-	        obj.emit = function(eventName) {
-	            // loop through all handlers for this event name and call them all
-	            for(var list = handlers[eventName], i = 0; list && list[i];) {
-	                list[i++].apply(obj, list.slice.call(arguments, 1));
-	            }
-	            return obj;
-	        }
-
-	        return obj;
-	    }
-	}
-
-
-/***/ },
-/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -853,7 +774,88 @@
 
 
 /***/ },
-/* 9 */
+/* 8 */,
+/* 9 */,
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	smokesignals = {
+	    convert: function(obj, handlers) {
+	        // we store the list of handlers as a local variable inside the scope
+	        // so that we don't have to add random properties to the object we are
+	        // converting. (prefixing variables in the object with an underscore or
+	        // two is an ugly solution)
+	        // we declare the variable in the function definition to use two less
+	        // characters (as opposed to using 'var ').  I consider this an inelegant
+	        // solution since smokesignals.convert.length now returns 2 when it is
+	        // really 1, but doing this doesn't otherwise change the functionallity of
+	        // this module, so we'll go with it for now
+	        handlers = {};
+
+	        // add a listener
+	        obj.on = function(eventName, handler) {
+	            // either use the existing array or create a new one for this event
+	            (handlers[eventName] || (handlers[eventName] = []))
+	                // add the handler to the array
+	                .push(handler);
+
+	            return obj;
+	        }
+
+	        // add a listener that will only be called once
+	        obj.once = function(eventName, handler) {
+	            // create a wrapper listener, that will remove itself after it is called
+	            function wrappedHandler() {
+	                // remove ourself, and then call the real handler with the args
+	                // passed to this wrapper
+	                handler.apply(obj.off(eventName, wrappedHandler), arguments);
+	            }
+	            // in order to allow that these wrapped handlers can be removed by
+	            // removing the original function, we save a reference to the original
+	            // function
+	            wrappedHandler.h = handler;
+
+	            // call the regular add listener function with our new wrapper
+	            return obj.on(eventName, wrappedHandler);
+	        }
+
+	        // remove a listener
+	        obj.off = function(eventName, handler) {
+	            // loop through all handlers for this eventName, assuming a handler
+	            // was passed in, to see if the handler passed in was any of them so
+	            // we can remove it
+	            for (var list = handlers[eventName], i = 0; handler && list && list[i]; i++) {
+	                // either this item is the handler passed in, or this item is a
+	                // wrapper for the handler passed in.  See the 'once' function
+	                list[i] != handler && list[i].h != handler ||
+	                    // remove it!
+	                    list.splice(i--,1);
+	            }
+	            // if i is 0 (i.e. falsy), then there are no items in the array for this
+	            // event name (or the array doesn't exist)
+	            if (!i) {
+	                // remove the array for this eventname (if it doesn't exist then
+	                // this isn't really hurting anything)
+	                delete handlers[eventName];
+	            }
+	            return obj;
+	        }
+
+	        obj.emit = function(eventName) {
+	            // loop through all handlers for this event name and call them all
+	            for(var list = handlers[eventName], i = 0; list && list[i];) {
+	                list[i++].apply(obj, list.slice.call(arguments, 1));
+	            }
+	            return obj;
+	        }
+
+	        return obj;
+	    }
+	}
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -864,8 +866,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreateCallback = __webpack_require__(12),
-	    baseIsEqual = __webpack_require__(13);
+	var baseCreateCallback = __webpack_require__(14),
+	    baseIsEqual = __webpack_require__(15);
 
 	/**
 	 * Performs a deep comparison between two values to determine if they are
@@ -913,7 +915,7 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(module) {
@@ -929,7 +931,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint browser:true, node:true*/
@@ -944,7 +946,7 @@
 	 * @copyright The Financial Times Limited [All Rights Reserved]
 	 * @license MIT License (see LICENSE.txt)
 	 */
-	var Delegate = __webpack_require__(14);
+	var Delegate = __webpack_require__(16);
 
 	module.exports = function(root) {
 	  return new Delegate(root);
@@ -954,7 +956,7 @@
 
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -965,10 +967,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var bind = __webpack_require__(22),
-	    identity = __webpack_require__(23),
-	    setBindData = __webpack_require__(15),
-	    support = __webpack_require__(16);
+	var bind = __webpack_require__(24),
+	    identity = __webpack_require__(25),
+	    setBindData = __webpack_require__(17),
+	    support = __webpack_require__(18);
 
 	/** Used to detected named functions */
 	var reFuncName = /^\s*function[ \n\r\t]+\w/;
@@ -1040,7 +1042,7 @@
 
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1051,11 +1053,11 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var forIn = __webpack_require__(17),
-	    getArray = __webpack_require__(18),
-	    isFunction = __webpack_require__(19),
-	    objectTypes = __webpack_require__(20),
-	    releaseArray = __webpack_require__(21);
+	var forIn = __webpack_require__(19),
+	    getArray = __webpack_require__(20),
+	    isFunction = __webpack_require__(21),
+	    objectTypes = __webpack_require__(22),
+	    releaseArray = __webpack_require__(23);
 
 	/** `Object#toString` result shortcuts */
 	var argsClass = '[object Arguments]',
@@ -1255,7 +1257,7 @@
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint browser:true, node:true*/
@@ -1690,7 +1692,7 @@
 
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1701,8 +1703,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var isNative = __webpack_require__(24),
-	    noop = __webpack_require__(25);
+	var isNative = __webpack_require__(26),
+	    noop = __webpack_require__(27);
 
 	/** Used as the property descriptor for `__bindData__` */
 	var descriptor = {
@@ -1739,7 +1741,7 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -1750,7 +1752,7 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var isNative = __webpack_require__(24);
+	var isNative = __webpack_require__(26);
 
 	/** Used to detect functions containing a `this` reference */
 	var reThis = /\bthis\b/;
@@ -1786,7 +1788,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1797,8 +1799,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreateCallback = __webpack_require__(12),
-	    objectTypes = __webpack_require__(20);
+	var baseCreateCallback = __webpack_require__(14),
+	    objectTypes = __webpack_require__(22);
 
 	/**
 	 * Iterates over own and inherited enumerable properties of an object,
@@ -1846,7 +1848,7 @@
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1857,7 +1859,7 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var arrayPool = __webpack_require__(26);
+	var arrayPool = __webpack_require__(28);
 
 	/**
 	 * Gets an array from the array pool or creates a new one if the pool is empty.
@@ -1873,7 +1875,7 @@
 
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1906,7 +1908,7 @@
 
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1932,7 +1934,7 @@
 
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1943,8 +1945,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var arrayPool = __webpack_require__(26),
-	    maxPoolSize = __webpack_require__(27);
+	var arrayPool = __webpack_require__(28),
+	    maxPoolSize = __webpack_require__(29);
 
 	/**
 	 * Releases the given array back to the array pool.
@@ -1963,7 +1965,7 @@
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1974,8 +1976,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var createWrapper = __webpack_require__(28),
-	    slice = __webpack_require__(29);
+	var createWrapper = __webpack_require__(30),
+	    slice = __webpack_require__(31);
 
 	/**
 	 * Creates a function that, when called, invokes `func` with the `this`
@@ -2009,7 +2011,7 @@
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2043,7 +2045,7 @@
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2083,7 +2085,7 @@
 
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2115,7 +2117,7 @@
 
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2134,7 +2136,7 @@
 
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2153,7 +2155,7 @@
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2164,10 +2166,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseBind = __webpack_require__(30),
-	    baseCreateWrapper = __webpack_require__(31),
-	    isFunction = __webpack_require__(19),
-	    slice = __webpack_require__(29);
+	var baseBind = __webpack_require__(32),
+	    baseCreateWrapper = __webpack_require__(33),
+	    isFunction = __webpack_require__(21),
+	    slice = __webpack_require__(31);
 
 	/**
 	 * Used for `Array` method references.
@@ -2265,7 +2267,7 @@
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2309,7 +2311,7 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2320,10 +2322,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreate = __webpack_require__(32),
-	    isObject = __webpack_require__(33),
-	    setBindData = __webpack_require__(15),
-	    slice = __webpack_require__(29);
+	var baseCreate = __webpack_require__(34),
+	    isObject = __webpack_require__(35),
+	    setBindData = __webpack_require__(17),
+	    slice = __webpack_require__(31);
 
 	/**
 	 * Used for `Array` method references.
@@ -2377,7 +2379,7 @@
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2388,10 +2390,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreate = __webpack_require__(32),
-	    isObject = __webpack_require__(33),
-	    setBindData = __webpack_require__(15),
-	    slice = __webpack_require__(29);
+	var baseCreate = __webpack_require__(34),
+	    isObject = __webpack_require__(35),
+	    setBindData = __webpack_require__(17),
+	    slice = __webpack_require__(31);
 
 	/**
 	 * Used for `Array` method references.
@@ -2461,7 +2463,7 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -2472,9 +2474,9 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var isNative = __webpack_require__(24),
-	    isObject = __webpack_require__(33),
-	    noop = __webpack_require__(25);
+	var isNative = __webpack_require__(26),
+	    isObject = __webpack_require__(35),
+	    noop = __webpack_require__(27);
 
 	/* Native method shortcuts for methods with the same name as other `lodash` methods */
 	var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
@@ -2510,7 +2512,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2521,7 +2523,7 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var objectTypes = __webpack_require__(20);
+	var objectTypes = __webpack_require__(22);
 
 	/**
 	 * Checks if `value` is the language type of Object.

@@ -7,6 +7,7 @@ module.exports = {
         'website.plugins.firebase': "./src/plugins/firebase",
         'website.plugins.firebase.rest': "./src/plugins/firebase.rest",
         'website.plugins.markdown':'./src/plugins/markdown',
+        'website.plugins.template.dot':'./src/plugins/template.dot',
         'website.plugins.render':'./src/plugins/render',
         'website.plugins.log':'./src/plugins/log',
     },
@@ -14,6 +15,9 @@ module.exports = {
     	alias: {
     		'Promise':'promiscuous'
     	}
+    },
+    devServer: {
+        publicPath: '/',
     },
     output: {
         path: path.join(__dirname, "dist"),

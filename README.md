@@ -40,6 +40,7 @@ Included plugins:
 	* Firebase
 	* Firebase REST
 * For rendering
+    * Template: Parse content using [DOT template engine](http://olado.github.io/doT/index.html)
 	* Markdown: Parse (some) content as Markdown
 	* Render: Insert HTML content into DOM-elements (using the element id)
 * For debugging
@@ -280,6 +281,21 @@ If you want, you can specify a filter (i.e. which content id need to use Markdow
 	    // data.markdown = ['pagea','pageb']
 	    markdown: function(id){
 	    	return this.data.markdown.indexOf(id) >= 0; 
+		}
+    })
+```
+
+### Template (DOT) Plugin
+
+On `gotContent`, compiles the template.
+On `render`, renders the template with your page metadata.
+
+If you want, you can specify a filter (see above)
+
+```javascript
+	new Website({
+		template: {
+			filter: '.tmpl' // string, regex or function
 		}
     })
 ```
