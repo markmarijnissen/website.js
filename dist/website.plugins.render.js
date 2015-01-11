@@ -44,8 +44,6 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getElement = __webpack_require__(2);
-
 	var RenderPlugin = {
 		render: function render(data) {
 			if(data.title)	{
@@ -54,14 +52,19 @@
 			if(typeof data.content === 'string'){
 				document.body.innerHTML = data.content;
 			} else if(typeof data.content === 'object'){
-				var keys = Object.keys(data.content);
-				var layoutIndex = keys.indexOf('layout');
-				if(layoutIndex >= 0){
-					keys.splice(layoutIndex,1);
-					keys.unshift('layout');
+				var keys
+				if(this.options.render && this.options.render.sequence){
+					keys = this.options.render.sequence;
+				} else {
+					keys = Object.keys(data.content);
+					var layoutIndex = keys.indexOf('layout');
+					if(layoutIndex >= 0){
+						keys.splice(layoutIndex,1);
+						keys.unshift('layout');
+					}
 				}
 				keys.map(function(id){
-						var el = getElement(id);
+						var el = document.getElementById(id);
 						if(el) el.innerHTML = data.content[id];
 					});
 			}
@@ -70,17 +73,6 @@
 
 	if(window.Website) window.Website.plugins.render = RenderPlugin;
 	module.exports = RenderPlugin;
-
-/***/ },
-/* 1 */,
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var elCache = {};
-	module.exports = function(id){
-		if(elCache[id]) return elCache[id];
-		return document.getElementById(id);
-	};
 
 /***/ }
 /******/ ])

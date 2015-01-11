@@ -11,6 +11,15 @@ npm install websitejs
 bower install websitejs
 ```
 
+Or use a file from the `/dist` folder directly.
+
+The `website.bundle.js` build is a basic, working website with:
+
+* HTTP (fetch sitemap and content using XHR)
+* Markdown (convert Markdown to HTML)
+* Render (Render content into document element IDs)
+* Log (Log all events for debugging)
+
 ## The Idea
 
 **website.js** is a framework for running multi-page content websites as a Single-Page-Application.
