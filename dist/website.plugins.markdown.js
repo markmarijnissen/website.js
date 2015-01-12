@@ -45,7 +45,7 @@
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	var marked = __webpack_require__(9);
+	var marked = __webpack_require__(10);
 	var toFilter = __webpack_require__(2);
 
 	var MarkdownPlugin = {
@@ -87,7 +87,7 @@
 
 /***/ },
 
-/***/ 9:
+/***/ 10:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**

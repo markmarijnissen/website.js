@@ -6,7 +6,7 @@ var CachePlugin = {
 		var self = this;
 		localforage.getItem('contentids')
 			.then(function(ids){
-				console.log('ids',ids);
+				if(!ids) ids = [];
 				return Promise.all(ids.map(function(id){
 					return localforage.getItem('content:'+id)
 						.then(function(content){
@@ -17,7 +17,6 @@ var CachePlugin = {
 				}));
 			})
 			.then(function(ids){
-				console.log('restored content ids',ids);
 				return localforage.getItem('data');
 			})
 			.then(function(data){
@@ -27,11 +26,9 @@ var CachePlugin = {
 			});
 	},
 	gotContent: function(id){
-		localforage.setItem('contentids',Object.keys(this.content));
 		localforage.setItem('content:'+id,this.content[id]);
 	},
 	gotData: function(data){
-		console.log('gotData cache',data);
 		localforage.setItem('data',data);
 	}
 };

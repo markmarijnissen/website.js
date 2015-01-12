@@ -45,7 +45,7 @@
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(8);
+	__webpack_require__(11);
 
 	function createLog(type){
 		return function log(){
@@ -77,7 +77,7 @@
 
 /***/ },
 
-/***/ 8:
+/***/ 11:
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
