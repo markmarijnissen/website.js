@@ -287,6 +287,8 @@ If you want, you can specify a filter (i.e. which content id need to use Markdow
 
 ### Template (DOT) Plugin
 
+Uses the fast and efficient [doT template engine](http://olado.github.io/doT/index.html).
+
 On `gotContent`, compiles the template.
 On `render`, renders the template with your page metadata.
 
@@ -299,6 +301,10 @@ If you want, you can specify a filter (see above)
 		}
     })
 ```
+
+### Cache Plugin
+
+Caches sitemap and content in IndexedDB, WebSQL or localStorage using [localForage](https://github.com/mozilla/localForage)
 
 ## Advanced features
 
@@ -316,7 +322,12 @@ site.getContent({name:id,name:id}), callback(err,{name:content,name:content})
 
 ## Changelog
 
-**0.1.0 9/1/2015**
+**0.2.0: 12/1/2015**
+
+* Added cache and template plugins
+* Added `bundle` build with everything included. 
+
+**0.1.0: 9/1/2015**
 
 First release. Implementation and API are probably relatively stable now.
 

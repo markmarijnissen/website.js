@@ -23,10 +23,18 @@
 
         <script src="../dist/website.plugins.http.js"></script>
         <script src="../dist/website.plugins.markdown.js"></script>
-        <script src="../dist/website.plugins.template.js"></script>
+        <script src="../dist/website.plugins.template.dot.js"></script>
         <script src="../dist/website.plugins.render.js"></script>
+        <script src="../dist/website.plugins.cache.js"></script>
         <script src="../dist/website.plugins.log.js"></script>
         <script>
+            var cached = location.href.indexOf('cached') >= 0;
+            if(cached){
+                console.log('loading website from cache');
+            } else {
+                console.log('loading website from http');
+            }
+
             window.site = new Website({
                 router: {
                     html5: false,
@@ -44,9 +52,10 @@
                 markdown: /\.md$/,
 
                 plugins: [
-                    Website.plugins.http,
+                    Website.plugins.cache,
+                    cached? null: Website.plugins.http,
                 //  Website.plugins.firebase,
-                //  Website.plugins.markdown,
+                    Website.plugins.markdown,
                     Website.plugins.template,
                     Website.plugins.render,
                     Website.plugins.log

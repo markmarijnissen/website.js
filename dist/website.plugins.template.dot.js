@@ -45,7 +45,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	// see https://lodash.com/docs#template
-	var dot = __webpack_require__(6);
+	var dot = __webpack_require__(7);
 	var toFilter = __webpack_require__(2);
 
 	var TemplatePlugin = {
@@ -102,7 +102,8 @@
 /* 3 */,
 /* 4 */,
 /* 5 */,
-/* 6 */
+/* 6 */,
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;// doT.js

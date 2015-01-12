@@ -6,12 +6,14 @@ module.exports = {
         "./src/plugins/http",
         "./src/plugins/render",
         "./src/plugins/markdown",
+        "./src/plugins/cache",
         "./src/plugins/template.dot",
         "./src/plugins/log"
     ],
     resolve: {
     	alias: {
-    		'Promise':'promiscuous'
+    		'Promise':'promiscuous',
+            'promise':'promiscuous'
     	}
     },
     output: {

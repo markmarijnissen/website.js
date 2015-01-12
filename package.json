@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "uglify": "rm -f dist/*.min.js && for f in dist/*.js; do uglifyjs -c -m -o ${f%.js}.min.js $f; done",
     "bundle": "webpack --config webpack.bundle.js && uglifyjs -c -m -o dist/website.bundle.min.js dist/website.bundle.js",
-    "build": "webpack && npm run uglify && npm run bundle"
+    "prepublish": "webpack && npm run bundle"
   },
   "repository": {
     "type": "git",

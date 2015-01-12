@@ -142,12 +142,14 @@ Website.prototype.setDataForUrl = function(url,data){
 };
 
 Website.prototype.setContent = function(id,content){
-	this.emit('gotContent',id,content);
+	this.content[id] = content;
+	this.emit('gotContent',id);
 };
 
 function routerCallback(params,url){
 	this.emit('navigated',params,url);
 }
+
 
 // export as global var
 window.Website = Website;

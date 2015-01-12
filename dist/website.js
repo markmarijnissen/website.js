@@ -44,10 +44,10 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(8);
+	__webpack_require__(5);
 	__webpack_require__(3);
-	var Router = __webpack_require__(4);
-	var smokesignals = __webpack_require__(5);
+	var Router = __webpack_require__(6);
+	var smokesignals = __webpack_require__(4);
 
 	function Website(options){
 		var self = this;
@@ -188,12 +188,14 @@
 	};
 
 	Website.prototype.setContent = function(id,content){
-		this.emit('gotContent',id,content);
+		this.content[id] = content;
+		this.emit('gotContent',id);
 	};
 
 	function routerCallback(params,url){
 		this.emit('navigated',params,url);
 	}
+
 
 	// export as global var
 	window.Website = Website;
@@ -203,8 +205,8 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(7);
-	var isEqual = __webpack_require__(11);
+	__webpack_require__(8);
+	var isEqual = __webpack_require__(13);
 
 	function checkContentForId(metadata,val){
 		if(!metadata || !metadata.content) return false;
@@ -291,8 +293,8 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(8);
-	var bodyDelegate = __webpack_require__(12)(document.body);
+	__webpack_require__(18);
+	var bodyDelegate = __webpack_require__(21)(document.body);
 
 	var options = {
 	  html5: false,
@@ -337,6 +339,62 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
+	var old;
+
+	if ('smokesignals' in global) {
+	    existed = true;
+	    old = global.smokesignals;
+	}
+
+	__webpack_require__(11);
+
+	module.exports = smokesignals;
+
+	if (existed) {
+	    global.smokesignals = old;
+	}
+	else {
+	    delete global.smokesignals;
+	}
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+	if (!Function.prototype.bind) {
+	  Function.prototype.bind = function (oThis) {
+	    if (typeof this !== "function") {
+	      // closest thing possible to the ECMAScript 5
+	      // internal IsCallable function
+	      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+	    }
+
+	    var aArgs = Array.prototype.slice.call(arguments, 1), 
+	        fToBind = this, 
+	        fNOP = function () {},
+	        fBound = function () {
+	          return fToBind.apply(this instanceof fNOP && oThis
+	                 ? this
+	                 : oThis,
+	                 aArgs.concat(Array.prototype.slice.call(arguments)));
+	        };
+
+	    fNOP.prototype = this.prototype;
+	    fBound.prototype = new fNOP();
+
+	    return fBound;
+	  };
+	}
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {function Router(options) {
@@ -483,36 +541,11 @@
 	} else {
 	  window.Router = Router;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(17)(module)))
 
 /***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var existed = false;
-	var old;
-
-	if ('smokesignals' in global) {
-	    existed = true;
-	    old = global.smokesignals;
-	}
-
-	__webpack_require__(10);
-
-	module.exports = smokesignals;
-
-	if (existed) {
-	    global.smokesignals = old;
-	}
-	else {
-	    delete global.smokesignals;
-	}
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 6 */,
-/* 7 */
+/* 7 */,
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -744,39 +777,9 @@
 
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-	if (!Function.prototype.bind) {
-	  Function.prototype.bind = function (oThis) {
-	    if (typeof this !== "function") {
-	      // closest thing possible to the ECMAScript 5
-	      // internal IsCallable function
-	      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-	    }
-
-	    var aArgs = Array.prototype.slice.call(arguments, 1), 
-	        fToBind = this, 
-	        fNOP = function () {},
-	        fBound = function () {
-	          return fToBind.apply(this instanceof fNOP && oThis
-	                 ? this
-	                 : oThis,
-	                 aArgs.concat(Array.prototype.slice.call(arguments)));
-	        };
-
-	    fNOP.prototype = this.prototype;
-	    fBound.prototype = new fNOP();
-
-	    return fBound;
-	  };
-	}
-
-
-/***/ },
 /* 9 */,
-/* 10 */
+/* 10 */,
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	smokesignals = {
@@ -855,7 +858,8 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */,
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -866,8 +870,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreateCallback = __webpack_require__(15),
-	    baseIsEqual = __webpack_require__(16);
+	var baseCreateCallback = __webpack_require__(24),
+	    baseIsEqual = __webpack_require__(25);
 
 	/**
 	 * Performs a deep comparison between two values to determine if they are
@@ -915,32 +919,10 @@
 
 
 /***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jshint browser:true, node:true*/
-
-	'use strict';
-
-	/**
-	 * @preserve Create and manage a DOM event delegator.
-	 *
-	 * @version 0.3.0
-	 * @codingstandard ftlabs-jsv2
-	 * @copyright The Financial Times Limited [All Rights Reserved]
-	 * @license MIT License (see LICENSE.txt)
-	 */
-	var Delegate = __webpack_require__(14);
-
-	module.exports = function(root) {
-	  return new Delegate(root);
-	};
-
-	module.exports.Delegate = Delegate;
-
-
-/***/ },
-/* 13 */
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(module) {
@@ -956,7 +938,368 @@
 
 
 /***/ },
-/* 14 */
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+	if (!Function.prototype.bind) {
+	  Function.prototype.bind = function (oThis) {
+	    if (typeof this !== "function") {
+	      // closest thing possible to the ECMAScript 5
+	      // internal IsCallable function
+	      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+	    }
+
+	    var aArgs = Array.prototype.slice.call(arguments, 1), 
+	        fToBind = this, 
+	        fNOP = function () {},
+	        fBound = function () {
+	          return fToBind.apply(this instanceof fNOP && oThis
+	                 ? this
+	                 : oThis,
+	                 aArgs.concat(Array.prototype.slice.call(arguments)));
+	        };
+
+	    fNOP.prototype = this.prototype;
+	    fBound.prototype = new fNOP();
+
+	    return fBound;
+	  };
+	}
+
+
+/***/ },
+/* 19 */,
+/* 20 */,
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*jshint browser:true, node:true*/
+
+	'use strict';
+
+	/**
+	 * @preserve Create and manage a DOM event delegator.
+	 *
+	 * @version 0.3.0
+	 * @codingstandard ftlabs-jsv2
+	 * @copyright The Financial Times Limited [All Rights Reserved]
+	 * @license MIT License (see LICENSE.txt)
+	 */
+	var Delegate = __webpack_require__(26);
+
+	module.exports = function(root) {
+	  return new Delegate(root);
+	};
+
+	module.exports.Delegate = Delegate;
+
+
+/***/ },
+/* 22 */,
+/* 23 */,
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+	var bind = __webpack_require__(35),
+	    identity = __webpack_require__(36),
+	    setBindData = __webpack_require__(28),
+	    support = __webpack_require__(29);
+
+	/** Used to detected named functions */
+	var reFuncName = /^\s*function[ \n\r\t]+\w/;
+
+	/** Used to detect functions containing a `this` reference */
+	var reThis = /\bthis\b/;
+
+	/** Native method shortcuts */
+	var fnToString = Function.prototype.toString;
+
+	/**
+	 * The base implementation of `_.createCallback` without support for creating
+	 * "_.pluck" or "_.where" style callbacks.
+	 *
+	 * @private
+	 * @param {*} [func=identity] The value to convert to a callback.
+	 * @param {*} [thisArg] The `this` binding of the created callback.
+	 * @param {number} [argCount] The number of arguments the callback accepts.
+	 * @returns {Function} Returns a callback function.
+	 */
+	function baseCreateCallback(func, thisArg, argCount) {
+	  if (typeof func != 'function') {
+	    return identity;
+	  }
+	  // exit early for no `thisArg` or already bound by `Function#bind`
+	  if (typeof thisArg == 'undefined' || !('prototype' in func)) {
+	    return func;
+	  }
+	  var bindData = func.__bindData__;
+	  if (typeof bindData == 'undefined') {
+	    if (support.funcNames) {
+	      bindData = !func.name;
+	    }
+	    bindData = bindData || !support.funcDecomp;
+	    if (!bindData) {
+	      var source = fnToString.call(func);
+	      if (!support.funcNames) {
+	        bindData = !reFuncName.test(source);
+	      }
+	      if (!bindData) {
+	        // checks if `func` references the `this` keyword and stores the result
+	        bindData = reThis.test(source);
+	        setBindData(func, bindData);
+	      }
+	    }
+	  }
+	  // exit early if there are no `this` references or `func` is bound
+	  if (bindData === false || (bindData !== true && bindData[1] & 1)) {
+	    return func;
+	  }
+	  switch (argCount) {
+	    case 1: return function(value) {
+	      return func.call(thisArg, value);
+	    };
+	    case 2: return function(a, b) {
+	      return func.call(thisArg, a, b);
+	    };
+	    case 3: return function(value, index, collection) {
+	      return func.call(thisArg, value, index, collection);
+	    };
+	    case 4: return function(accumulator, value, index, collection) {
+	      return func.call(thisArg, accumulator, value, index, collection);
+	    };
+	  }
+	  return bind(func, thisArg);
+	}
+
+	module.exports = baseCreateCallback;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+	var forIn = __webpack_require__(30),
+	    getArray = __webpack_require__(31),
+	    isFunction = __webpack_require__(32),
+	    objectTypes = __webpack_require__(33),
+	    releaseArray = __webpack_require__(34);
+
+	/** `Object#toString` result shortcuts */
+	var argsClass = '[object Arguments]',
+	    arrayClass = '[object Array]',
+	    boolClass = '[object Boolean]',
+	    dateClass = '[object Date]',
+	    numberClass = '[object Number]',
+	    objectClass = '[object Object]',
+	    regexpClass = '[object RegExp]',
+	    stringClass = '[object String]';
+
+	/** Used for native method references */
+	var objectProto = Object.prototype;
+
+	/** Used to resolve the internal [[Class]] of values */
+	var toString = objectProto.toString;
+
+	/** Native method shortcuts */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * The base implementation of `_.isEqual`, without support for `thisArg` binding,
+	 * that allows partial "_.where" style comparisons.
+	 *
+	 * @private
+	 * @param {*} a The value to compare.
+	 * @param {*} b The other value to compare.
+	 * @param {Function} [callback] The function to customize comparing values.
+	 * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
+	 * @param {Array} [stackA=[]] Tracks traversed `a` objects.
+	 * @param {Array} [stackB=[]] Tracks traversed `b` objects.
+	 * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+	 */
+	function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
+	  // used to indicate that when comparing objects, `a` has at least the properties of `b`
+	  if (callback) {
+	    var result = callback(a, b);
+	    if (typeof result != 'undefined') {
+	      return !!result;
+	    }
+	  }
+	  // exit early for identical values
+	  if (a === b) {
+	    // treat `+0` vs. `-0` as not equal
+	    return a !== 0 || (1 / a == 1 / b);
+	  }
+	  var type = typeof a,
+	      otherType = typeof b;
+
+	  // exit early for unlike primitive values
+	  if (a === a &&
+	      !(a && objectTypes[type]) &&
+	      !(b && objectTypes[otherType])) {
+	    return false;
+	  }
+	  // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
+	  // http://es5.github.io/#x15.3.4.4
+	  if (a == null || b == null) {
+	    return a === b;
+	  }
+	  // compare [[Class]] names
+	  var className = toString.call(a),
+	      otherClass = toString.call(b);
+
+	  if (className == argsClass) {
+	    className = objectClass;
+	  }
+	  if (otherClass == argsClass) {
+	    otherClass = objectClass;
+	  }
+	  if (className != otherClass) {
+	    return false;
+	  }
+	  switch (className) {
+	    case boolClass:
+	    case dateClass:
+	      // coerce dates and booleans to numbers, dates to milliseconds and booleans
+	      // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+	      return +a == +b;
+
+	    case numberClass:
+	      // treat `NaN` vs. `NaN` as equal
+	      return (a != +a)
+	        ? b != +b
+	        // but treat `+0` vs. `-0` as not equal
+	        : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+	    case regexpClass:
+	    case stringClass:
+	      // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+	      // treat string primitives and their corresponding object instances as equal
+	      return a == String(b);
+	  }
+	  var isArr = className == arrayClass;
+	  if (!isArr) {
+	    // unwrap any `lodash` wrapped values
+	    var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
+	        bWrapped = hasOwnProperty.call(b, '__wrapped__');
+
+	    if (aWrapped || bWrapped) {
+	      return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+	    }
+	    // exit for functions and DOM nodes
+	    if (className != objectClass) {
+	      return false;
+	    }
+	    // in older versions of Opera, `arguments` objects have `Array` constructors
+	    var ctorA = a.constructor,
+	        ctorB = b.constructor;
+
+	    // non `Object` object instances with different constructors are not equal
+	    if (ctorA != ctorB &&
+	          !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+	          ('constructor' in a && 'constructor' in b)
+	        ) {
+	      return false;
+	    }
+	  }
+	  // assume cyclic structures are equal
+	  // the algorithm for detecting cyclic structures is adapted from ES 5.1
+	  // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+	  var initedStack = !stackA;
+	  stackA || (stackA = getArray());
+	  stackB || (stackB = getArray());
+
+	  var length = stackA.length;
+	  while (length--) {
+	    if (stackA[length] == a) {
+	      return stackB[length] == b;
+	    }
+	  }
+	  var size = 0;
+	  result = true;
+
+	  // add `a` and `b` to the stack of traversed objects
+	  stackA.push(a);
+	  stackB.push(b);
+
+	  // recursively compare objects and arrays (susceptible to call stack limits)
+	  if (isArr) {
+	    // compare lengths to determine if a deep comparison is necessary
+	    length = a.length;
+	    size = b.length;
+	    result = size == length;
+
+	    if (result || isWhere) {
+	      // deep compare the contents, ignoring non-numeric properties
+	      while (size--) {
+	        var index = length,
+	            value = b[size];
+
+	        if (isWhere) {
+	          while (index--) {
+	            if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
+	              break;
+	            }
+	          }
+	        } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
+	          break;
+	        }
+	      }
+	    }
+	  }
+	  else {
+	    // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+	    // which, in this case, is more costly
+	    forIn(b, function(value, key, b) {
+	      if (hasOwnProperty.call(b, key)) {
+	        // count the number of properties.
+	        size++;
+	        // deep compare each property value.
+	        return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
+	      }
+	    });
+
+	    if (result && !isWhere) {
+	      // ensure both objects have the same number of properties
+	      forIn(a, function(value, key, a) {
+	        if (hasOwnProperty.call(a, key)) {
+	          // `size` will be `-1` if `a` has more properties than `b`
+	          return (result = --size > -1);
+	        }
+	      });
+	    }
+	  }
+	  stackA.pop();
+	  stackB.pop();
+
+	  if (initedStack) {
+	    releaseArray(stackA);
+	    releaseArray(stackB);
+	  }
+	  return result;
+	}
+
+	module.exports = baseIsEqual;
+
+
+/***/ },
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jshint browser:true, node:true*/
@@ -1391,7 +1734,8 @@
 
 
 /***/ },
-/* 15 */
+/* 27 */,
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1402,82 +1746,92 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var bind = __webpack_require__(24),
-	    identity = __webpack_require__(25),
-	    setBindData = __webpack_require__(22),
-	    support = __webpack_require__(23);
+	var isNative = __webpack_require__(38),
+	    noop = __webpack_require__(39);
 
-	/** Used to detected named functions */
-	var reFuncName = /^\s*function[ \n\r\t]+\w/;
+	/** Used as the property descriptor for `__bindData__` */
+	var descriptor = {
+	  'configurable': false,
+	  'enumerable': false,
+	  'value': null,
+	  'writable': false
+	};
+
+	/** Used to set meta data on functions */
+	var defineProperty = (function() {
+	  // IE 8 only accepts DOM elements
+	  try {
+	    var o = {},
+	        func = isNative(func = Object.defineProperty) && func,
+	        result = func(o, o, o) && func;
+	  } catch(e) { }
+	  return result;
+	}());
+
+	/**
+	 * Sets `this` binding data on a given function.
+	 *
+	 * @private
+	 * @param {Function} func The function to set data on.
+	 * @param {Array} value The data array to set.
+	 */
+	var setBindData = !defineProperty ? noop : function(func, value) {
+	  descriptor.value = value;
+	  defineProperty(func, '__bindData__', descriptor);
+	};
+
+	module.exports = setBindData;
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+	var isNative = __webpack_require__(38);
 
 	/** Used to detect functions containing a `this` reference */
 	var reThis = /\bthis\b/;
 
-	/** Native method shortcuts */
-	var fnToString = Function.prototype.toString;
+	/**
+	 * An object used to flag environments features.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @type Object
+	 */
+	var support = {};
 
 	/**
-	 * The base implementation of `_.createCallback` without support for creating
-	 * "_.pluck" or "_.where" style callbacks.
+	 * Detect if functions can be decompiled by `Function#toString`
+	 * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
 	 *
-	 * @private
-	 * @param {*} [func=identity] The value to convert to a callback.
-	 * @param {*} [thisArg] The `this` binding of the created callback.
-	 * @param {number} [argCount] The number of arguments the callback accepts.
-	 * @returns {Function} Returns a callback function.
+	 * @memberOf _.support
+	 * @type boolean
 	 */
-	function baseCreateCallback(func, thisArg, argCount) {
-	  if (typeof func != 'function') {
-	    return identity;
-	  }
-	  // exit early for no `thisArg` or already bound by `Function#bind`
-	  if (typeof thisArg == 'undefined' || !('prototype' in func)) {
-	    return func;
-	  }
-	  var bindData = func.__bindData__;
-	  if (typeof bindData == 'undefined') {
-	    if (support.funcNames) {
-	      bindData = !func.name;
-	    }
-	    bindData = bindData || !support.funcDecomp;
-	    if (!bindData) {
-	      var source = fnToString.call(func);
-	      if (!support.funcNames) {
-	        bindData = !reFuncName.test(source);
-	      }
-	      if (!bindData) {
-	        // checks if `func` references the `this` keyword and stores the result
-	        bindData = reThis.test(source);
-	        setBindData(func, bindData);
-	      }
-	    }
-	  }
-	  // exit early if there are no `this` references or `func` is bound
-	  if (bindData === false || (bindData !== true && bindData[1] & 1)) {
-	    return func;
-	  }
-	  switch (argCount) {
-	    case 1: return function(value) {
-	      return func.call(thisArg, value);
-	    };
-	    case 2: return function(a, b) {
-	      return func.call(thisArg, a, b);
-	    };
-	    case 3: return function(value, index, collection) {
-	      return func.call(thisArg, value, index, collection);
-	    };
-	    case 4: return function(accumulator, value, index, collection) {
-	      return func.call(thisArg, accumulator, value, index, collection);
-	    };
-	  }
-	  return bind(func, thisArg);
-	}
+	support.funcDecomp = !isNative(global.WinRTError) && reThis.test(function() { return this; });
 
-	module.exports = baseCreateCallback;
+	/**
+	 * Detect if `Function#name` is supported (all but IE).
+	 *
+	 * @memberOf _.support
+	 * @type boolean
+	 */
+	support.funcNames = typeof Function.name == 'string';
 
+	module.exports = support;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 16 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1488,223 +1842,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var forIn = __webpack_require__(17),
-	    getArray = __webpack_require__(18),
-	    isFunction = __webpack_require__(19),
-	    objectTypes = __webpack_require__(20),
-	    releaseArray = __webpack_require__(21);
-
-	/** `Object#toString` result shortcuts */
-	var argsClass = '[object Arguments]',
-	    arrayClass = '[object Array]',
-	    boolClass = '[object Boolean]',
-	    dateClass = '[object Date]',
-	    numberClass = '[object Number]',
-	    objectClass = '[object Object]',
-	    regexpClass = '[object RegExp]',
-	    stringClass = '[object String]';
-
-	/** Used for native method references */
-	var objectProto = Object.prototype;
-
-	/** Used to resolve the internal [[Class]] of values */
-	var toString = objectProto.toString;
-
-	/** Native method shortcuts */
-	var hasOwnProperty = objectProto.hasOwnProperty;
-
-	/**
-	 * The base implementation of `_.isEqual`, without support for `thisArg` binding,
-	 * that allows partial "_.where" style comparisons.
-	 *
-	 * @private
-	 * @param {*} a The value to compare.
-	 * @param {*} b The other value to compare.
-	 * @param {Function} [callback] The function to customize comparing values.
-	 * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
-	 * @param {Array} [stackA=[]] Tracks traversed `a` objects.
-	 * @param {Array} [stackB=[]] Tracks traversed `b` objects.
-	 * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
-	 */
-	function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
-	  // used to indicate that when comparing objects, `a` has at least the properties of `b`
-	  if (callback) {
-	    var result = callback(a, b);
-	    if (typeof result != 'undefined') {
-	      return !!result;
-	    }
-	  }
-	  // exit early for identical values
-	  if (a === b) {
-	    // treat `+0` vs. `-0` as not equal
-	    return a !== 0 || (1 / a == 1 / b);
-	  }
-	  var type = typeof a,
-	      otherType = typeof b;
-
-	  // exit early for unlike primitive values
-	  if (a === a &&
-	      !(a && objectTypes[type]) &&
-	      !(b && objectTypes[otherType])) {
-	    return false;
-	  }
-	  // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
-	  // http://es5.github.io/#x15.3.4.4
-	  if (a == null || b == null) {
-	    return a === b;
-	  }
-	  // compare [[Class]] names
-	  var className = toString.call(a),
-	      otherClass = toString.call(b);
-
-	  if (className == argsClass) {
-	    className = objectClass;
-	  }
-	  if (otherClass == argsClass) {
-	    otherClass = objectClass;
-	  }
-	  if (className != otherClass) {
-	    return false;
-	  }
-	  switch (className) {
-	    case boolClass:
-	    case dateClass:
-	      // coerce dates and booleans to numbers, dates to milliseconds and booleans
-	      // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
-	      return +a == +b;
-
-	    case numberClass:
-	      // treat `NaN` vs. `NaN` as equal
-	      return (a != +a)
-	        ? b != +b
-	        // but treat `+0` vs. `-0` as not equal
-	        : (a == 0 ? (1 / a == 1 / b) : a == +b);
-
-	    case regexpClass:
-	    case stringClass:
-	      // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
-	      // treat string primitives and their corresponding object instances as equal
-	      return a == String(b);
-	  }
-	  var isArr = className == arrayClass;
-	  if (!isArr) {
-	    // unwrap any `lodash` wrapped values
-	    var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
-	        bWrapped = hasOwnProperty.call(b, '__wrapped__');
-
-	    if (aWrapped || bWrapped) {
-	      return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
-	    }
-	    // exit for functions and DOM nodes
-	    if (className != objectClass) {
-	      return false;
-	    }
-	    // in older versions of Opera, `arguments` objects have `Array` constructors
-	    var ctorA = a.constructor,
-	        ctorB = b.constructor;
-
-	    // non `Object` object instances with different constructors are not equal
-	    if (ctorA != ctorB &&
-	          !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
-	          ('constructor' in a && 'constructor' in b)
-	        ) {
-	      return false;
-	    }
-	  }
-	  // assume cyclic structures are equal
-	  // the algorithm for detecting cyclic structures is adapted from ES 5.1
-	  // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
-	  var initedStack = !stackA;
-	  stackA || (stackA = getArray());
-	  stackB || (stackB = getArray());
-
-	  var length = stackA.length;
-	  while (length--) {
-	    if (stackA[length] == a) {
-	      return stackB[length] == b;
-	    }
-	  }
-	  var size = 0;
-	  result = true;
-
-	  // add `a` and `b` to the stack of traversed objects
-	  stackA.push(a);
-	  stackB.push(b);
-
-	  // recursively compare objects and arrays (susceptible to call stack limits)
-	  if (isArr) {
-	    // compare lengths to determine if a deep comparison is necessary
-	    length = a.length;
-	    size = b.length;
-	    result = size == length;
-
-	    if (result || isWhere) {
-	      // deep compare the contents, ignoring non-numeric properties
-	      while (size--) {
-	        var index = length,
-	            value = b[size];
-
-	        if (isWhere) {
-	          while (index--) {
-	            if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
-	              break;
-	            }
-	          }
-	        } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
-	          break;
-	        }
-	      }
-	    }
-	  }
-	  else {
-	    // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
-	    // which, in this case, is more costly
-	    forIn(b, function(value, key, b) {
-	      if (hasOwnProperty.call(b, key)) {
-	        // count the number of properties.
-	        size++;
-	        // deep compare each property value.
-	        return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
-	      }
-	    });
-
-	    if (result && !isWhere) {
-	      // ensure both objects have the same number of properties
-	      forIn(a, function(value, key, a) {
-	        if (hasOwnProperty.call(a, key)) {
-	          // `size` will be `-1` if `a` has more properties than `b`
-	          return (result = --size > -1);
-	        }
-	      });
-	    }
-	  }
-	  stackA.pop();
-	  stackB.pop();
-
-	  if (initedStack) {
-	    releaseArray(stackA);
-	    releaseArray(stackB);
-	  }
-	  return result;
-	}
-
-	module.exports = baseIsEqual;
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-	var baseCreateCallback = __webpack_require__(15),
-	    objectTypes = __webpack_require__(20);
+	var baseCreateCallback = __webpack_require__(24),
+	    objectTypes = __webpack_require__(33);
 
 	/**
 	 * Iterates over own and inherited enumerable properties of an object,
@@ -1752,7 +1891,7 @@
 
 
 /***/ },
-/* 18 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1763,7 +1902,7 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var arrayPool = __webpack_require__(26);
+	var arrayPool = __webpack_require__(40);
 
 	/**
 	 * Gets an array from the array pool or creates a new one if the pool is empty.
@@ -1779,7 +1918,7 @@
 
 
 /***/ },
-/* 19 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1812,7 +1951,7 @@
 
 
 /***/ },
-/* 20 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1838,7 +1977,7 @@
 
 
 /***/ },
-/* 21 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1849,8 +1988,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var arrayPool = __webpack_require__(26),
-	    maxPoolSize = __webpack_require__(27);
+	var arrayPool = __webpack_require__(40),
+	    maxPoolSize = __webpack_require__(41);
 
 	/**
 	 * Releases the given array back to the array pool.
@@ -1869,7 +2008,7 @@
 
 
 /***/ },
-/* 22 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1880,104 +2019,8 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var isNative = __webpack_require__(28),
-	    noop = __webpack_require__(29);
-
-	/** Used as the property descriptor for `__bindData__` */
-	var descriptor = {
-	  'configurable': false,
-	  'enumerable': false,
-	  'value': null,
-	  'writable': false
-	};
-
-	/** Used to set meta data on functions */
-	var defineProperty = (function() {
-	  // IE 8 only accepts DOM elements
-	  try {
-	    var o = {},
-	        func = isNative(func = Object.defineProperty) && func,
-	        result = func(o, o, o) && func;
-	  } catch(e) { }
-	  return result;
-	}());
-
-	/**
-	 * Sets `this` binding data on a given function.
-	 *
-	 * @private
-	 * @param {Function} func The function to set data on.
-	 * @param {Array} value The data array to set.
-	 */
-	var setBindData = !defineProperty ? noop : function(func, value) {
-	  descriptor.value = value;
-	  defineProperty(func, '__bindData__', descriptor);
-	};
-
-	module.exports = setBindData;
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-	var isNative = __webpack_require__(28);
-
-	/** Used to detect functions containing a `this` reference */
-	var reThis = /\bthis\b/;
-
-	/**
-	 * An object used to flag environments features.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @type Object
-	 */
-	var support = {};
-
-	/**
-	 * Detect if functions can be decompiled by `Function#toString`
-	 * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
-	 *
-	 * @memberOf _.support
-	 * @type boolean
-	 */
-	support.funcDecomp = !isNative(global.WinRTError) && reThis.test(function() { return this; });
-
-	/**
-	 * Detect if `Function#name` is supported (all but IE).
-	 *
-	 * @memberOf _.support
-	 * @type boolean
-	 */
-	support.funcNames = typeof Function.name == 'string';
-
-	module.exports = support;
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-	var createWrapper = __webpack_require__(30),
-	    slice = __webpack_require__(31);
+	var createWrapper = __webpack_require__(42),
+	    slice = __webpack_require__(43);
 
 	/**
 	 * Creates a function that, when called, invokes `func` with the `this`
@@ -2011,7 +2054,7 @@
 
 
 /***/ },
-/* 25 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2045,45 +2088,8 @@
 
 
 /***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-
-	/** Used to pool arrays and objects used internally */
-	var arrayPool = [];
-
-	module.exports = arrayPool;
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
-	 * Build: `lodash modularize modern exports="node" -o ./modern/`
-	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
-	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
-	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-	 * Available under MIT license <http://lodash.com/license>
-	 */
-
-	/** Used as the max size of the `arrayPool` and `objectPool` */
-	var maxPoolSize = 40;
-
-	module.exports = maxPoolSize;
-
-
-/***/ },
-/* 28 */
+/* 37 */,
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2123,7 +2129,7 @@
 
 
 /***/ },
-/* 29 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2155,7 +2161,7 @@
 
 
 /***/ },
-/* 30 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2166,10 +2172,48 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseBind = __webpack_require__(32),
-	    baseCreateWrapper = __webpack_require__(33),
-	    isFunction = __webpack_require__(19),
-	    slice = __webpack_require__(31);
+
+	/** Used to pool arrays and objects used internally */
+	var arrayPool = [];
+
+	module.exports = arrayPool;
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+
+	/** Used as the max size of the `arrayPool` and `objectPool` */
+	var maxPoolSize = 40;
+
+	module.exports = maxPoolSize;
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+	 * Build: `lodash modularize modern exports="node" -o ./modern/`
+	 * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+	 * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	 * Available under MIT license <http://lodash.com/license>
+	 */
+	var baseBind = __webpack_require__(44),
+	    baseCreateWrapper = __webpack_require__(45),
+	    isFunction = __webpack_require__(32),
+	    slice = __webpack_require__(43);
 
 	/**
 	 * Used for `Array` method references.
@@ -2267,7 +2311,7 @@
 
 
 /***/ },
-/* 31 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2311,7 +2355,7 @@
 
 
 /***/ },
-/* 32 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2322,10 +2366,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreate = __webpack_require__(34),
-	    isObject = __webpack_require__(35),
-	    setBindData = __webpack_require__(22),
-	    slice = __webpack_require__(31);
+	var baseCreate = __webpack_require__(46),
+	    isObject = __webpack_require__(47),
+	    setBindData = __webpack_require__(28),
+	    slice = __webpack_require__(43);
 
 	/**
 	 * Used for `Array` method references.
@@ -2379,7 +2423,7 @@
 
 
 /***/ },
-/* 33 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2390,10 +2434,10 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var baseCreate = __webpack_require__(34),
-	    isObject = __webpack_require__(35),
-	    setBindData = __webpack_require__(22),
-	    slice = __webpack_require__(31);
+	var baseCreate = __webpack_require__(46),
+	    isObject = __webpack_require__(47),
+	    setBindData = __webpack_require__(28),
+	    slice = __webpack_require__(43);
 
 	/**
 	 * Used for `Array` method references.
@@ -2463,7 +2507,7 @@
 
 
 /***/ },
-/* 34 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -2474,9 +2518,9 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var isNative = __webpack_require__(28),
-	    isObject = __webpack_require__(35),
-	    noop = __webpack_require__(29);
+	var isNative = __webpack_require__(38),
+	    isObject = __webpack_require__(47),
+	    noop = __webpack_require__(39);
 
 	/* Native method shortcuts for methods with the same name as other `lodash` methods */
 	var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
@@ -2512,7 +2556,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 35 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2523,7 +2567,7 @@
 	 * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	 * Available under MIT license <http://lodash.com/license>
 	 */
-	var objectTypes = __webpack_require__(20);
+	var objectTypes = __webpack_require__(33);
 
 	/**
 	 * Checks if `value` is the language type of Object.
