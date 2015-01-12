@@ -325,7 +325,8 @@ site.getContent({name:id,name:id}), callback(err,{name:content,name:content})
 **0.2.0: 12/1/2015**
 
 * Added cache and template plugins
-* Added `bundle` build with everything included. 
+* Added `bundle` build with everything included.
+* Few minor bugfixes 
 
 **0.1.0: 9/1/2015**
 
